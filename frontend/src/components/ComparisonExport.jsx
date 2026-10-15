@@ -33,12 +33,12 @@ export default function ComparisonExport({ data = [], query = '' }) {
             onClick={handleCSVExport}
             disabled={!data.length}
             title="Export results as CSV"
-            className="inline-flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-400 hover:text-slate-200 border border-slate-700/60 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold tracking-wide transition-all duration-200"
+            className="inline-flex items-center space-x-1.5 bg-[#18181C] hover:bg-[#222228] disabled:opacity-40 disabled:cursor-not-allowed text-zinc-300 hover:text-white border border-white/[0.08] hover:border-[#E5C878]/30 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold tracking-wide transition-all duration-200"
         >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 text-[#E5C878]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span className="hidden sm:inline">Export CSV</span>
+            <span className="hidden sm:inline font-mono">Export CSV</span>
         </button>
     );
 }

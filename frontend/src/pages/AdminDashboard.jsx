@@ -37,10 +37,10 @@ export default function AdminDashboard() {
     }, []);
 
     return (
-        <div className="relative z-10 w-full min-h-screen flex bg-[#080e1a] text-white overflow-hidden">
+        <div className="relative z-10 w-full min-h-screen flex bg-[#0D0D10] text-white overflow-hidden">
             {/* Ambient Background Glows */}
-            <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-1/3 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#E5C878]/5 rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute bottom-0 left-1/3 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-[160px] pointer-events-none" />
 
             <FilterSidebar
                 marketplaces={['Amazon', 'Flipkart', 'Croma', 'Reliance Digital', 'Tata CLIQ']}
@@ -63,10 +63,10 @@ export default function AdminDashboard() {
                     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
                         <div>
                             <div className="flex items-center gap-2">
-                                <span className="p-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                                <span className="p-1.5 rounded-lg bg-[#E5C878]/15 border border-[#E5C878]/35 text-[#F3E5AB]">
                                     <Cpu className="w-4 h-4" />
                                 </span>
-                                <span className="font-mono text-[10px] tracking-[0.24em] text-indigo-300 uppercase font-semibold">
+                                <span className="font-mono text-[10px] tracking-[0.24em] text-[#E5C878] uppercase font-semibold">
                                     System Administration & Telemetry
                                 </span>
                             </div>

@@ -17,11 +17,11 @@ class RouteErrorBoundary extends React.Component {
     render() {
         if (this.state.error) {
             return (
-                <main role="alert" className="min-h-screen flex items-center justify-center bg-[#070d19] p-6 text-white">
-                    <section className="max-w-md rounded-2xl border border-white/10 bg-[#0f1422] p-7 text-center">
-                        <h1 className="text-xl font-bold">This page could not be displayed</h1>
-                        <p className="mt-3 text-sm text-neutral-300">A page module or component failed while loading. Reload to retry the page.</p>
-                        <button onClick={() => window.location.reload()} className="mt-6 rounded-xl bg-cyan-600 px-5 py-3 font-semibold hover:bg-cyan-500">Reload page</button>
+                <main role="alert" className="min-h-screen flex items-center justify-center bg-[#0D0D10] p-6 text-white">
+                    <section className="max-w-md rounded-3xl border border-white/10 bg-[#121215] p-7 text-center shadow-2xl">
+                        <h1 className="text-xl font-bold font-display">This page could not be displayed</h1>
+                        <p className="mt-3 text-sm text-zinc-300">A page module or component failed while loading. Reload to retry the page.</p>
+                        <button onClick={() => window.location.reload()} className="mt-6 rounded-xl bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] text-[#09090B] px-5 py-3 font-bold hover:brightness-110 shadow-sm">Reload page</button>
                     </section>
                 </main>
             );
@@ -36,8 +36,8 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 function PageLoading() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#070d19]">
-            <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" aria-label="Loading page" />
+        <div className="min-h-screen flex items-center justify-center bg-[#0D0D10]">
+            <div className="w-8 h-8 border-4 border-[#E5C878] border-t-transparent rounded-full animate-spin" aria-label="Loading page" />
         </div>
     );
 }

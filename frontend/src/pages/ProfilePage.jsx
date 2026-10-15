@@ -251,17 +251,17 @@ export default function ProfilePage() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-            <div role="status" aria-label="Loading profile" className="animate-spin w-8 h-8 rounded-full border-2 border-cyan-500 border-t-transparent"></div>
+        <div className="min-h-screen bg-[#0D0D10] flex items-center justify-center">
+            <div role="status" aria-label="Loading profile" className="animate-spin w-8 h-8 rounded-full border-2 border-[#E5C878] border-t-transparent"></div>
         </div>
     );
 
     if (loadError) return (
-        <main className="min-h-screen bg-[#070b14] flex items-center justify-center p-6 text-white">
-            <section role="alert" className="max-w-md rounded-2xl border border-white/10 bg-[#0f1422] p-7 text-center">
-                <h1 className="text-xl font-bold">Profile unavailable</h1>
-                <p className="mt-3 text-sm text-neutral-300">{loadError}</p>
-                <button onClick={() => { setLoading(true); setLoadAttempt((attempt) => attempt + 1); }} className="mt-6 rounded-xl bg-cyan-600 px-5 py-3 font-semibold hover:bg-cyan-500">
+        <main className="min-h-screen bg-[#0D0D10] flex items-center justify-center p-6 text-white">
+            <section role="alert" className="max-w-md rounded-3xl border border-white/10 bg-[#121215] p-7 text-center shadow-2xl">
+                <h1 className="text-xl font-bold font-display">Profile unavailable</h1>
+                <p className="mt-3 text-sm text-zinc-300">{loadError}</p>
+                <button onClick={() => { setLoading(true); setLoadAttempt((attempt) => attempt + 1); }} className="mt-6 rounded-xl bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] text-[#09090B] px-5 py-3 font-bold hover:brightness-110 shadow-sm">
                     Retry
                 </button>
             </section>
@@ -854,7 +854,7 @@ export default function ProfilePage() {
                                 }}
                                 className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${dialog.title === 'Delete Account'
                                         ? 'bg-rose-500 hover:bg-rose-600 text-white'
-                                        : 'bg-cyan-500 hover:bg-cyan-600 text-white'
+                                        : 'bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] text-[#09090B] hover:brightness-110 shadow-sm'
                                     }`}
                             >
                                 {dialog.type === 'confirm' ? 'Confirm' : 'OK'}

@@ -49,17 +49,17 @@ export default function MarketTicker({ items = [] }) {
 
     return (
         <div 
-            className="w-full bg-neutral-950/80 border-b border-white/[0.06] backdrop-blur-md px-4 py-1.5 overflow-hidden select-none z-20 flex items-center text-left transition-all duration-500 animate-fade-in"
+            className="w-full bg-[#0D0D10]/95 border-b border-white/[0.08] backdrop-blur-md px-4 py-1.5 overflow-hidden select-none z-20 flex items-center text-left transition-all duration-500 animate-fade-in"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
         >
             <div className="flex items-center gap-2 shrink-0 pr-4 border-r border-white/10">
-                <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-400/20 px-2 py-0.5 rounded-md shadow-[0_0_12px_-3px_rgba(34,211,238,0.3)]">
+                <div className="flex items-center gap-1.5 bg-[#E5C878]/10 border border-[#E5C878]/25 px-2 py-0.5 rounded-md shadow-[0_0_12px_-3px_rgba(229,200,120,0.3)]">
                     <span className="relative flex h-1.5 w-1.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500" />
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E5C878] opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#E5C878]" />
                     </span>
-                    <span className="text-cyan-400 font-mono text-[9px] uppercase tracking-widest font-semibold">Live Feed</span>
+                    <span className="text-[#F3E5AB] font-mono text-[9px] uppercase tracking-widest font-semibold">Live Feed</span>
                 </div>
             </div>
 
@@ -74,12 +74,12 @@ export default function MarketTicker({ items = [] }) {
                     {[...tickerItems, ...tickerItems].map((item, idx) => {
                         const Icon = item.Icon;
                         return (
-                            <div key={`${item.id}-${idx}`} className="inline-flex items-center gap-2 text-xs text-neutral-300">
-                                <span className="inline-flex items-center gap-1 rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[9px] font-medium text-cyan-300 border border-white/5">
-                                    <Icon className="w-3 h-3 text-cyan-400" />
+                            <div key={`${item.id}-${idx}`} className="inline-flex items-center gap-2 text-xs text-zinc-300">
+                                <span className="inline-flex items-center gap-1 rounded bg-[#E5C878]/10 px-1.5 py-0.5 font-mono text-[9px] font-medium text-[#F3E5AB] border border-[#E5C878]/20">
+                                    <Icon className="w-3 h-3 text-[#E5C878]" />
                                     {item.tag}
                                 </span>
-                                <span className="text-neutral-300 font-sans text-[11px]">{item.text}</span>
+                                <span className="text-zinc-300 font-sans text-[11px]">{item.text}</span>
                             </div>
                         );
                     })}

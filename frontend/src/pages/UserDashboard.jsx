@@ -115,7 +115,7 @@ function ProductDetailsDrawer({ product, onClose }) {
                                     ✓ Live Verified
                                 </span>
                             ) : hasPrice ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5C878]/30 bg-[#E5C878]/10 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#F3E5AB] shadow-[0_0_12px_rgba(229,200,120,0.15)]">
                                     ✓ Indexed Offer
                                 </span>
                             ) : null}
@@ -153,29 +153,29 @@ function ProductDetailsDrawer({ product, onClose }) {
                                     {isOverBudget ? 'Over Budget' : 'Matched'}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between rounded-2xl bg-gradient-to-br from-cyan-500/[0.05] to-transparent border border-cyan-500/[0.1] p-4 text-xs shadow-sm backdrop-blur-xl">
+                            <div className="flex items-center justify-between rounded-2xl bg-white/[0.02] border border-white/[0.08] p-4 text-xs shadow-sm backdrop-blur-xl">
                                 <span className="text-neutral-400">Trust Index</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-16 h-1.5 bg-black/40 rounded-full overflow-hidden">
-                                        <div className="w-[98%] h-full bg-cyan-400 shadow-[0_0_10px_cyan]" />
+                                        <div className="w-[98%] h-full bg-[#E5C878] shadow-[0_0_10px_rgba(229,200,120,0.4)]" />
                                     </div>
-                                    <span className="text-cyan-400 font-mono font-bold">9.8</span>
+                                    <span className="text-[#F3E5AB] font-mono font-bold">9.8</span>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between rounded-2xl bg-gradient-to-br from-indigo-500/[0.05] to-transparent border border-indigo-500/[0.1] p-4 text-xs shadow-sm backdrop-blur-xl">
+                            <div className="flex items-center justify-between rounded-2xl bg-white/[0.02] border border-white/[0.08] p-4 text-xs shadow-sm backdrop-blur-xl">
                                 <span className="text-neutral-400">Review Sentiment</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-16 h-1.5 bg-black/40 rounded-full overflow-hidden">
-                                        <div className="w-[94%] h-full bg-indigo-400 shadow-[0_0_10px_indigo]" />
+                                        <div className="w-[94%] h-full bg-[#34D399] shadow-[0_0_10px_rgba(52,211,153,0.4)]" />
                                     </div>
-                                    <span className="text-indigo-400 font-bold">94%</span>
+                                    <span className="text-[#34D399] font-bold">94%</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="shrink-0 p-6 border-t border-white/[0.06] bg-[#070d19]/80 backdrop-blur-md flex gap-3 relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                <div className="shrink-0 p-6 border-t border-white/[0.06] bg-[#0D0D10]/95 backdrop-blur-md flex gap-3 relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
                     {product.url ? (
                         <a
                             href={product.url}
@@ -314,7 +314,7 @@ function CommandPalette({ isOpen, onClose, onSubmit, recentQueries }) {
             <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md animate-fade-in" onClick={onClose} />
             <div className="fixed top-[20%] left-1/2 -translate-x-1/2 z-50 w-full max-w-xl seamas-glass-strong rounded-2xl overflow-hidden shadow-2xl p-5 border border-white/10 text-left">
                 <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                    <Command className="h-5 w-5 text-cyan-400 animate-pulse" />
+                    <Command className="h-5 w-5 text-[#E5C878] animate-pulse" />
                     <input
                         ref={inputRef}
                         type="text"
@@ -639,10 +639,12 @@ export default function UserDashboard() {
         let initialGuest = false;
         let localCredits = 50;
         let localTier = 'Free';
+        let localRenewAt = null;
         if (local) {
             const parsed = JSON.parse(local);
             localCredits = parsed.credits ?? 50;
             localTier = parsed.tier ?? 'Free';
+            localRenewAt = parsed.renewAt ?? null;
             if (parsed.isGuest) {
                 initialGuest = true;
                 setUserSession({
@@ -763,12 +765,12 @@ export default function UserDashboard() {
             if (session) {
                 let actualTier = localTier;
                 let actualCredits = localCredits;
-                let actualRenewAt = null;
+                let actualRenewAt = localRenewAt;
                 try {
                     const data = await apiService.getCredits(session.user.id);
                     actualTier = data.tier?.toLowerCase() === 'pro' ? 'Pro' : 'Free';
                     actualCredits = data.credits;
-                    actualRenewAt = data.renew_at || null;
+                    actualRenewAt = data.renew_at || data.renewAt || localRenewAt;
                     if (local) {
                         const parsed = JSON.parse(local);
                         parsed.tier = actualTier;
@@ -798,10 +800,19 @@ export default function UserDashboard() {
             if (session) {
                 let actualTier = 'Free';
                 let actualCredits = 50;
+                let actualRenewAt = null;
                 try {
                     const data = await apiService.getCredits(session.user.id);
                     actualTier = data.tier?.toLowerCase() === 'pro' ? 'Pro' : 'Free';
                     actualCredits = data.credits;
+                    actualRenewAt = data.renew_at || data.renewAt || null;
+                    const stored = JSON.parse(localStorage.getItem('seamas_user_session') || 'null');
+                    if (stored) {
+                        stored.tier = actualTier;
+                        stored.credits = actualCredits;
+                        if (actualRenewAt) stored.renewAt = actualRenewAt;
+                        localStorage.setItem('seamas_user_session', JSON.stringify(stored));
+                    }
                 } catch (e) { console.error(e); }
 
                 setUserSession({
@@ -809,7 +820,8 @@ export default function UserDashboard() {
                     email: session.user.email,
                     name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
                     tier: actualTier,
-                    credits: actualCredits
+                    credits: actualCredits,
+                    renewAt: actualRenewAt
                 });
                 await syncUserData(session);
 
@@ -1137,13 +1149,15 @@ export default function UserDashboard() {
                     const actual = await settleWithin(apiService.getCredits(), 8000, 'Authoritative credit refresh');
                     try {
                         const snapshot = normalizeCreditSnapshot(actual);
+                        const authoritativeRenewAt = actual?.renew_at || actual?.renewAt || null;
                         setUserSession((previous) => previous?.id === userSession.id
-                            ? { ...previous, tier: snapshot.tier, credits: snapshot.credits }
+                            ? { ...previous, tier: snapshot.tier, credits: snapshot.credits, renewAt: authoritativeRenewAt || previous.renewAt }
                             : previous);
                         const stored = JSON.parse(localStorage.getItem('seamas_user_session') || 'null');
                         if (stored?.id === userSession.id) {
                             stored.tier = snapshot.tier;
                             stored.credits = snapshot.credits;
+                            if (authoritativeRenewAt) stored.renewAt = authoritativeRenewAt;
                             localStorage.setItem('seamas_user_session', JSON.stringify(stored));
                         }
                     } catch {
@@ -1412,7 +1426,7 @@ export default function UserDashboard() {
                                                 <div className="mt-2 h-48 rounded-xl border border-white/[0.05] bg-black/40 p-3 font-mono text-[10px] text-neutral-400 overflow-y-auto space-y-1.5 custom-scrollbar">
                                                     {logs.map((log, index) => (
                                                         <div key={index} className="leading-relaxed border-b border-white/[0.02] pb-1 last:border-0">
-                                                            <span className="text-cyan-400 select-none mr-1.5">›</span>
+                                                            <span className="text-[#E5C878] select-none mr-1.5">›</span>
                                                             {log}
                                                         </div>
                                                     ))}
@@ -1566,7 +1580,7 @@ export default function UserDashboard() {
                                     {recentQueries.map((q, idx) => (
                                         <div
                                             key={idx}
-                                            className="w-full seamas-glass p-4 rounded-xl border border-white/[0.04] hover:border-cyan-400/20 hover:bg-cyan-400/[0.01] transition-all flex items-center justify-between text-left group"
+                                            className="w-full seamas-glass p-4 rounded-xl border border-white/[0.04] hover:border-[#E5C878]/30 hover:bg-[#E5C878]/[0.02] transition-all flex items-center justify-between text-left group"
                                         >
                                             <button
                                                 onClick={() => handleQuerySubmit(q)}
@@ -1576,7 +1590,7 @@ export default function UserDashboard() {
                                                     #{idx + 1}
                                                 </div>
                                                 <div className="min-w-0 flex-1">
-                                                    <div className="text-sm font-display font-medium text-white group-hover:text-cyan-300 transition-colors truncate">{q}</div>
+                                                    <div className="text-sm font-display font-medium text-white group-hover:text-[#F3E5AB] transition-colors truncate">{q}</div>
                                                     <div className="text-[10px] font-mono text-neutral-500 mt-0.5">Pipeline status: Completed successfully</div>
                                                 </div>
                                             </button>
@@ -1597,7 +1611,7 @@ export default function UserDashboard() {
                                                 </button>
                                                 <button
                                                     onClick={() => handleQuerySubmit(q)}
-                                                    className="p-1.5 rounded-lg text-neutral-500 hover:text-cyan-300 hover:bg-cyan-500/10 transition-colors"
+                                                    className="p-1.5 rounded-lg text-neutral-500 hover:text-[#F3E5AB] hover:bg-[#E5C878]/10 transition-colors"
                                                     title="Rerun query"
                                                 >
                                                     <ArrowUpRight className="h-4 w-4" />
@@ -1625,7 +1639,7 @@ export default function UserDashboard() {
                                     </div>
                                     <button
                                         onClick={() => setActiveTab('discover')}
-                                        className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-xs text-neutral-200 hover:border-cyan-400/30 hover:bg-cyan-400/[0.06]"
+                                        className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-xs text-neutral-200 hover:border-[#E5C878]/40 hover:bg-[#E5C878]/[0.06] hover:text-[#F3E5AB]"
                                     >
                                         Explore Deals
                                     </button>
