@@ -286,7 +286,7 @@ function ProductHeroCard({
     return (
         <div 
             onClick={() => onCardClick && onCardClick(product)}
-            className="col-span-full w-full rounded-2xl bg-[#121215] border border-white/[0.08] p-6 sm:p-8 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-15px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col gap-6 mb-6 group cursor-pointer text-left hover:border-white/20 transition-all"
+            className="col-span-full w-full rounded-2xl bg-[#121215]/90 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_24px_48px_-15px_rgba(0,0,0,0.85)] relative overflow-hidden flex flex-col gap-6 mb-6 group cursor-pointer text-left hover:border-white/20 transition-all"
         >
             {/* Subtle warm champagne specular lighting */}
             <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-b from-[#E6C762]/[0.08] to-transparent blur-3xl pointer-events-none" />
@@ -578,7 +578,7 @@ function ProductCard({
     return (
         <article
             onClick={() => onCardClick && onCardClick(product)}
-            className="card-reveal card-interactive product-card-glow group relative flex flex-col justify-between overflow-hidden rounded-2xl cursor-pointer bg-[#121215] border border-white/[0.08] shadow-[0_16px_36px_-12px_rgba(0,0,0,0.8)] hover:border-white/[0.2] transition-all"
+            className="card-reveal card-interactive product-card-glow group relative flex flex-col justify-between overflow-hidden rounded-2xl cursor-pointer bg-[#121215]/90 backdrop-blur-xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-12px_rgba(0,0,0,0.85)] hover:border-white/[0.2] transition-all"
         >
             {/* Studio-White Pedestal for Real Photos or Obsidian Schematic for Fallbacks */}
             <div className={`relative aspect-[4/3] m-3 rounded-2xl p-4 flex items-center justify-center overflow-hidden shadow-inner ${
