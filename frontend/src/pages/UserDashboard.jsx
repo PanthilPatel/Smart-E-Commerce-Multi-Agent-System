@@ -4,7 +4,7 @@ import ChatInterface from '../components/ChatInterface';
 import SentimentBanner from '../components/SentimentBanner';
 import AiVerdictBanner from '../components/AiVerdictBanner';
 import FilterSidebar from '../components/FilterSidebar';
-import ProductGrid, { getCategoryFallbackImage, isNonStoreOrArticleItem } from '../components/ProductGrid';
+import ProductGrid, { getCategoryFallbackImage, isNonStoreOrArticleItem, getStoreMeta } from '../components/ProductGrid';
 import { apiService } from '../services/api';
 import MarketTicker from '../components/MarketTicker';
 import { supabase } from '../lib/supabase';
@@ -65,138 +65,137 @@ function ProductDetailsDrawer({ product, onClose }) {
     const original = product.original_price ? Number(product.original_price) : (product.indexed_original_price ? Number(product.indexed_original_price) : null);
     const discount = hasPrice && original && original > price ? Math.round(((original - price) / original) * 100) : 0;
 
+    const storeMeta = getStoreMeta(product.marketplace);
+
     return (
         <>
             <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 animate-fade-in" onClick={onClose} />
-            <div className="fixed top-0 right-0 z-50 h-full w-full max-w-md flex flex-col overflow-hidden transition-all duration-300 animate-slide-in-right"
-                style={{
-                    background: 'linear-gradient(180deg, #09090b 0%, #030305 100%)',
-                    borderLeft: '1px solid rgba(255,255,255,0.06)',
-                    boxShadow: '-20px 0 80px rgba(0,0,0,0.85)',
-                }}>
+            <div className="fixed top-0 right-0 z-50 h-full w-full max-w-md flex flex-col overflow-hidden bg-[#0D0D10]/98 backdrop-blur-2xl border-l border-white/[0.08] shadow-[-20px_0_80px_rgba(0,0,0,0.9)] transition-all duration-300 animate-slide-in-right">
 
-                <div className="shrink-0 px-6 py-5 border-b border-white/5 flex items-center justify-between">
+                <div className="shrink-0 px-6 py-5 border-b border-white/[0.08] flex items-center justify-between">
                     <div className="flex flex-col text-left">
-                        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Product Analysis</span>
+                        <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#E5C878] shadow-[0_0_8px_#E5C878]" />
+                            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#E5C878] font-bold">Product Analysis</span>
+                        </div>
                         <h3 className="text-sm font-bold font-display text-white mt-1 line-clamp-1">
                             {title}
                         </h3>
                     </div>
-                    <button onClick={onClose} className="text-white/40 hover:text-white p-1.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all btn-magnetic">
+                    <button 
+                        onClick={onClose} 
+                        className="text-zinc-400 hover:text-white p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-white/20 transition-all"
+                        aria-label="Close product details"
+                    >
                         ✕
                     </button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 text-left">
 
-                    <div className="w-full h-72 rounded-3xl bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.08] flex items-center justify-center overflow-hidden relative group shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-md p-6">
-                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)] opacity-50" />
+                    <div className="w-full aspect-[4/3] rounded-3xl bg-gradient-to-b from-[#FFFFFF] to-[#F4F4F6] p-6 flex items-center justify-center overflow-hidden relative group shadow-inner">
                         <img
                             src={imgSrc}
                             alt={title}
                             referrerPolicy="no-referrer"
-                            className="object-contain w-full h-full drop-shadow-2xl transition-all duration-700 group-hover:scale-105 group-hover:-translate-y-2 relative z-10"
+                            className="object-contain w-full h-full max-h-[220px] mix-blend-multiply drop-shadow-md transition-all duration-500 group-hover:scale-105"
                             onError={() => {
                                 if (imgSrc !== fallbackImage) {
                                     setImgSrc(fallbackImage);
                                 }
                             }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#070d19] via-transparent to-transparent opacity-80 pointer-events-none" />
                     </div>
 
                     <div className="space-y-5">
                         <div className="flex items-center justify-between">
-                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.05] px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-200 shadow-sm backdrop-blur-sm">
-                                {product.marketplace}
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-200 shadow-sm backdrop-blur-sm">
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: storeMeta.dot }} />
+                                <span>{storeMeta.name}</span>
                             </span>
                             {isLiveVerified ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.15)]">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#34D399] shadow-[0_0_12px_rgba(52,211,153,0.15)]">
                                     ✓ Live Verified
                                 </span>
                             ) : hasPrice ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5C878]/30 bg-[#E5C878]/10 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#F3E5AB] shadow-[0_0_12px_rgba(229,200,120,0.15)]">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E5C878]/30 bg-[#E5C878]/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[#F3E5AB] shadow-[0_0_12px_rgba(229,200,120,0.15)]">
                                     ✓ Indexed Offer
                                 </span>
                             ) : null}
                         </div>
 
-                        <div className="border-b border-white/[0.06] pb-5">
-                            <div className="flex items-end gap-3 mb-1">
-                                <div className="text-5xl font-bold font-display text-white tracking-tight drop-shadow-md">
+                        <div className="border-b border-white/[0.08] pb-5">
+                            <div className="flex items-baseline gap-3">
+                                <div className="text-4xl sm:text-5xl font-bold font-display text-white tracking-tight">
                                     {hasPrice ? `₹${price.toLocaleString('en-IN')}` : 'Price unavailable'}
                                 </div>
                                 {hasPrice && original && (
-                                    <span className="text-lg text-neutral-500 line-through mb-1">
+                                    <span className="text-base text-zinc-500 line-through">
                                         ₹{original.toLocaleString('en-IN')}
                                     </span>
                                 )}
                             </div>
                             {discount > 0 && (
-                                <div className="inline-block mt-2 px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400 uppercase tracking-widest shadow-sm">
-                                    Save {discount}% Off
+                                <div className="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-md bg-[#34D399] text-[#09090B] font-mono text-[10px] font-bold shadow-sm">
+                                    <span>SAVE ₹{(original - price).toLocaleString('en-IN')} ({discount}% OFF)</span>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     <div className="space-y-4 pt-2">
-                        <h4 className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-neutral-500 flex items-center gap-2">
-                            <span className="h-px bg-white/10 flex-1"></span>
+                        <h4 className="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500 flex items-center gap-2">
+                            <span className="h-px bg-white/[0.06] flex-1"></span>
                             Pipeline Insights
-                            <span className="h-px bg-white/10 flex-1"></span>
+                            <span className="h-px bg-white/[0.06] flex-1"></span>
                         </h4>
-                        <div className="grid gap-3">
-                            <div className="flex items-center justify-between rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.05] p-4 text-xs shadow-sm hover:border-white/10 transition-all backdrop-blur-xl">
-                                <span className="text-neutral-400">Budget Match</span>
-                                <span className={`font-bold px-2 py-0.5 rounded-md ${isOverBudget ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                        <div className="grid gap-2.5">
+                            <div className="flex items-center justify-between rounded-xl bg-white/[0.02] border border-white/[0.06] p-3.5 text-xs">
+                                <span className="text-zinc-400">Budget Match</span>
+                                <span className={`font-bold px-2 py-0.5 rounded-md text-[11px] font-mono ${isOverBudget ? 'bg-rose-500/10 border border-rose-500/30 text-rose-400' : 'bg-emerald-500/10 border border-emerald-500/30 text-[#34D399]'}`}>
                                     {isOverBudget ? 'Over Budget' : 'Matched'}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between rounded-2xl bg-white/[0.02] border border-white/[0.08] p-4 text-xs shadow-sm backdrop-blur-xl">
-                                <span className="text-neutral-400">Trust Index</span>
+                            <div className="flex items-center justify-between rounded-xl bg-white/[0.02] border border-white/[0.06] p-3.5 text-xs">
+                                <span className="text-zinc-400">Trust Index</span>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-16 h-1.5 bg-black/40 rounded-full overflow-hidden">
-                                        <div className="w-[98%] h-full bg-[#E5C878] shadow-[0_0_10px_rgba(229,200,120,0.4)]" />
+                                    <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                        <div className="w-[98%] h-full bg-[#E5C878] shadow-[0_0_8px_rgba(229,200,120,0.4)]" />
                                     </div>
                                     <span className="text-[#F3E5AB] font-mono font-bold">9.8</span>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between rounded-2xl bg-white/[0.02] border border-white/[0.08] p-4 text-xs shadow-sm backdrop-blur-xl">
-                                <span className="text-neutral-400">Review Sentiment</span>
+                            <div className="flex items-center justify-between rounded-xl bg-white/[0.02] border border-white/[0.06] p-3.5 text-xs">
+                                <span className="text-zinc-400">Review Sentiment</span>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-16 h-1.5 bg-black/40 rounded-full overflow-hidden">
-                                        <div className="w-[94%] h-full bg-[#34D399] shadow-[0_0_10px_rgba(52,211,153,0.4)]" />
+                                    <div className="w-16 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                        <div className="w-[94%] h-full bg-[#34D399] shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
                                     </div>
-                                    <span className="text-[#34D399] font-bold">94%</span>
+                                    <span className="text-[#34D399] font-mono font-bold">94%</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="shrink-0 p-6 border-t border-white/[0.06] bg-[#0D0D10]/95 backdrop-blur-md flex gap-3 relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                <div className="shrink-0 p-6 border-t border-white/[0.08] bg-[#0D0D10]/95 backdrop-blur-md flex gap-3 relative z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.6)]">
                     {product.url ? (
                         <a
                             href={product.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] hover:scale-[1.02] active:scale-[0.98]"
-                            style={{ background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)' }}
+                            className="flex-1 group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl py-3.5 px-6 text-sm font-bold text-[#09090B] bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] shadow-[0_8px_24px_rgba(229,200,120,0.25)] hover:shadow-[0_12px_32px_rgba(229,200,120,0.4)] hover:brightness-105 active:scale-[0.98] transition-all duration-200"
                         >
-                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                            <span className="relative flex items-center gap-2">
+                            <span className="flex items-center gap-2">
                                 Visit Deal Store <ArrowUpRight className="h-4 w-4" />
                             </span>
                         </a>
                     ) : (
                         <button
-                            className="flex-1 group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl py-3 text-sm font-medium text-white shadow-lg transition-transform duration-200 hover:scale-[1.01] active:scale-[0.99] btn-magnetic"
+                            disabled
+                            className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-medium text-zinc-500 bg-white/[0.04] border border-white/[0.08] cursor-not-allowed"
                         >
-                            <span className="aurora-cta absolute inset-0" aria-hidden="true" />
-                            <span className="relative flex items-center gap-1.5">
-                                Store Unavailable
-                            </span>
+                            Store Unavailable
                         </button>
                     )}
                 </div>
