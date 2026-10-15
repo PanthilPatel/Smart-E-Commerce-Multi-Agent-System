@@ -50,3 +50,31 @@ async def test_assistant_endpoint_direct_call():
         assert data["suggested_query"] == "iphone 17 pro max"
         assert "Search Live Market for 'iphone 17 pro max'" in data["action_label"]
         assert "OnePlus Nord" not in data["reply"]
+
+
+@pytest.mark.asyncio
+async def test_assistant_endpoint_bank_emi_offers():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        res = await client.post("/api/assistant", json={
+            "message": "Best bank card & EMI offers",
+            "current_query": "Sansui TV 55 inch",
+            "products": [
+                {
+                    "product_name": "Sansui 55 Inch 4K Ultra HD Smart TV",
+                    "marketplace": "Amazon",
+                    "price": 18059,
+                    "extracted_price": 18059
+                }
+            ]
+        })
+        assert res.status_code == 200
+        data = res.json()
+        assert "reply" in data
+        reply = data["reply"].lower()
+        # Must NOT contain refusal
+        assert "can't assist" not in reply
+        assert "cannot assist" not in reply
+        # Must contain bank/EMI details
+        assert ("emi" in reply or "bank" in reply or "hdfc" in reply or "discount" in reply)
+

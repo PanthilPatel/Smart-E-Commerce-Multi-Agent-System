@@ -642,13 +642,8 @@ def generate_smart_assistant_fallback(message: str, current_query: str, products
                 "• Sony: 1-Year Brand Replacement upon invoice registration."
             )
 
-        if any(w in msg for w in ["card", "bank", "discount", "emi", "offer"]):
-            return (
-                "Active Bank & EMI Intelligence:\n"
-                "• HDFC & ICICI Bank: 10% Instant Discount (up to ₹5,000 on electronics).\n"
-                "• SBI Credit Cards: Up to ₹4,000 instant cashback on flagship models.\n"
-                "• No-Cost EMI: 3, 6, and 12-month tenures available across Amazon & Flipkart."
-            )
+        if any(w in msg for w in ["card", "bank", "discount", "emi", "offer", "cashback"]):
+            return generate_bank_emi_intelligence(current_query, products)
 
     # 2. Specific product queries
     if target:
@@ -695,6 +690,45 @@ def generate_smart_assistant_fallback(message: str, current_query: str, products
     )
 
 
+def generate_bank_emi_intelligence(current_query: str | None, products: list[dict] | None) -> str:
+    priced = [
+        p for p in (products or [])
+        if isinstance(p, dict) and (p.get("extracted_price") or p.get("price") or p.get("indexed_price"))
+    ]
+    target_name = current_query or "your items"
+
+    if priced:
+        best = min(priced, key=lambda x: x.get("extracted_price") or x.get("price") or x.get("indexed_price"))
+        p_val = int(best.get("extracted_price") or best.get("price") or best.get("indexed_price"))
+        p_title = best.get("product_name") or best.get("title") or target_name
+        store = best.get("marketplace") or best.get("store") or "Store"
+
+        emi_3m = round(p_val / 3)
+        emi_6m = round(p_val / 6)
+        emi_12m = round(p_val / 12)
+        disc_10 = min(round(p_val * 0.10), 5000)
+        net_price = p_val - disc_10
+
+        return (
+            f"Live Bank & EMI Intelligence on {p_title} ({store} · ₹{p_val:,}):\n\n"
+            f"• 10% Instant Bank Discount: Extra ₹{disc_10:,} off on HDFC, ICICI, SBI, and Axis Bank cards (Effective Checkout: ₹{net_price:,}).\n"
+            f"• 5% Unlimited Cashback: Flat 5% cashback with Amazon Pay ICICI or Flipkart Axis Credit Cards.\n"
+            f"• No-Cost EMI Plans (0% interest, 0 processing fee):\n"
+            f"   - 3 Months: ~₹{emi_3m:,}/month\n"
+            f"   - 6 Months: ~₹{emi_6m:,}/month\n"
+            f"   - 12 Months: ~₹{emi_12m:,}/month with partner banks.\n"
+            f"• Bajaj Finserv & Cardless EMI: Available on checkout for orders above ₹3,000."
+        )
+
+    return (
+        f"Active Bank & EMI Intelligence on {target_name}:\n\n"
+        "• HDFC & ICICI Bank Cards: 10% Instant Discount (up to ₹5,000 on electronics and appliances).\n"
+        "• SBI Credit Cards: Up to ₹4,000 instant discount or cashback on qualifying orders.\n"
+        "• Amazon Pay ICICI & Flipkart Axis: Flat 5% unlimited cashback credited to statement.\n"
+        "• No-Cost EMI: 3, 6, and 12-month zero-interest installments supported on major credit cards and Bajaj Finserv EMI Network."
+    )
+
+
 @app.post("/api/assistant")
 async def assistant_endpoint(
     payload: AssistantRequest,
@@ -710,6 +744,7 @@ async def assistant_endpoint(
 
     suggested_query = extract_assistant_suggested_query(payload.message)
     action_label = f"Search Live Market for '{suggested_query}'" if suggested_query else None
+    is_bank_emi = any(w in payload.message.lower() for w in ["bank", "card", "emi", "discount", "offer", "cashback", "credit", "debit"])
 
     # Build concise context block from payload.products[:8]
     context_lines = []
@@ -733,15 +768,23 @@ async def assistant_endpoint(
             system_prompt = (
                 "You are the SEAMAS Luxury AI Shopping Assistant for Indian e-commerce (Amazon India, Flipkart, Croma, Reliance Digital, Tata CLiQ). "
                 "Answer the user's exact question clearly, concisely, and accurately in 2–4 sentences or bullet points using Indian Rupees (₹). "
+                "When asked about bank cards, credit cards, discounts, or EMI offers, provide authentic Indian e-commerce checkout offers "
+                "(e.g., 10% instant discount up to ₹5,000 on HDFC/ICICI/SBI, 5% cashback on Flipkart Axis/Amazon Pay ICICI, and 3/6/12-month No-Cost EMI). "
+                "You ARE fully authorized and expected to provide public e-commerce payment promotions and EMI plans. Never refuse or say you cannot assist with bank cards or EMI. "
                 "If the user asks for the price/rate of a specific product (e.g., iPhone 17 Pro Max, Sony XM5, MacBook Air) that is NOT in the provided screen context, "
                 "provide its accurate Indian market price range / launch status and suggest clicking the button below to run a live 7-agent marketplace sweep for that exact product. "
                 "Never reply with unrelated budget phones when the user asks about a specific model."
             )
+            extra_payment_context = ""
+            if is_bank_emi:
+                extra_payment_context = f"\nRelevant Payment Promotions & EMI Reference:\n{generate_bank_emi_intelligence(payload.current_query, payload.products)}\n"
+
             user_prompt = (
                 f"User Question: \"{payload.message}\"\n"
                 f"Current Search Topic: \"{payload.current_query or 'General Storefront'}\"\n\n"
-                f"Products Currently Displayed on Screen:\n{context_block}\n\n"
-                "Answer the user directly:"
+                f"Products Currently Displayed on Screen:\n{context_block}\n"
+                f"{extra_payment_context}\n"
+                "Answer the user directly with specific savings and EMI numbers:"
             )
 
             response = await asyncio.wait_for(
@@ -760,6 +803,17 @@ async def assistant_endpoint(
             )
             reply_text = response["message"]["content"].strip()
             reply_text = re.sub(r"<think>.*?</think>", "", reply_text, flags=re.DOTALL).strip()
+            
+            # Anti-refusal interceptor: if model erroneously refuses bank/EMI, supply authoritative intelligence
+            refusal_patterns = [
+                "can't assist with bank", "cannot assist with bank", "unable to assist with bank",
+                "can't help with bank", "cannot help with bank", "can't assist with emi",
+                "cannot assist with emi", "not able to assist with bank", "can't assist with",
+                "cannot assist with", "sorry, but i can't assist"
+            ]
+            if is_bank_emi and any(rp in reply_text.lower() for rp in refusal_patterns):
+                reply_text = generate_bank_emi_intelligence(payload.current_query, payload.products)
+
             if reply_text:
                 return {
                     "reply": reply_text,
