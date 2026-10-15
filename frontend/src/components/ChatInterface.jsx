@@ -886,42 +886,6 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                     ))}
                 </div>
             </div>
-
-            {/* 7-Agent Architecture Preview Bar */}
-            <div className="mt-8 rounded-2xl bg-[#121215]/90 border border-white/[0.08] p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-xl">
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-3 border-b border-white/[0.06] pb-2.5">
-                    <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#E6C762] shadow-[0_0_8px_#E6C762]" />
-                        <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-300 font-semibold">
-                            Autonomous Multi-Agent Architecture
-                        </span>
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[#34D399] font-mono text-[10px] font-semibold">
-                        <CheckCircle2 className="w-3 h-3 text-[#34D399]" />
-                        7/7 Nodes Armed · &lt;1ms Routing
-                    </span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-left">
-                    {[
-                        { step: '01', name: 'Orchestrator', role: 'Intent & Guard' },
-                        { step: '02', name: 'Search', role: '14 Market Sweep' },
-                        { step: '03', name: 'Live Price', role: 'DOM Verification' },
-                        { step: '04', name: 'Sentiment', role: 'NLP Synthesis' },
-                        { step: '05', name: 'Budget', role: 'Ceiling Tolerance' },
-                        { step: '06', name: 'Ranking', role: 'Utility Matrix' },
-                        { step: '07', name: 'Finalizer', role: 'Executive Brief' },
-                    ].map((node) => (
-                        <div key={node.step} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 transition-colors">
-                            <div className="flex items-center justify-between font-mono text-[9px] text-zinc-500 mb-1">
-                                <span>{node.step}</span>
-                                <span className="text-[#E6C762]">•</span>
-                            </div>
-                            <div className="text-xs font-semibold text-zinc-200 truncate">{node.name}</div>
-                            <div className="text-[10px] text-zinc-500 truncate mt-0.5">{node.role}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
         </section>
     );
 }
