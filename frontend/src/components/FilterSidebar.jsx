@@ -121,14 +121,24 @@ export default function FilterSidebar({
                             ₹{Number(priceRange).toLocaleString('en-IN')}
                         </span>
                     </div>
-                    <input
-                        type="range"
-                        min={0}
-                        max={maxPriceLimit}
-                        step={1}
-                        value={priceRange}
-                        onChange={e => setPriceRange(Number(e.target.value))}
-                    />
+                    {(() => {
+                        const pct = Math.min(100, Math.max(0, ((priceRange || 0) / (maxPriceLimit || 1)) * 100));
+                        return (
+                            <input
+                                type="range"
+                                min={0}
+                                max={maxPriceLimit}
+                                step={1}
+                                value={priceRange}
+                                onChange={e => setPriceRange(Number(e.target.value))}
+                                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-[#E5C878] focus:outline-none"
+                                style={{
+                                    accentColor: '#E5C878',
+                                    background: `linear-gradient(to right, #E5C878 0%, #E5C878 ${pct}%, rgba(255,255,255,0.1) ${pct}%, rgba(255,255,255,0.1) 100%)`
+                                }}
+                            />
+                        );
+                    })()}
                 </div>
             </div>
 

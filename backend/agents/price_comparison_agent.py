@@ -843,59 +843,68 @@ def select_real_product_image(matched_rec: Dict[str, Any], product_name: str = "
     return get_category_product_image(product_name)
 
 async def price_comparison_agent(state: Dict[str, Any]) -> Dict[str, Any]:
-    search_results = state.get("search_results", [])
-    query = state.get("query", "")
-    budget = state.get("budget_status", {}).get("ceiling") or state.get("budget")
-    if not budget:
-        try:
-            from agents.budget_advisor_agent import _extract_budget
-            budget = _extract_budget(query)
-        except Exception:
-            budget = None
-
-    print("\n--- OLLAMA INTENT-CLASSIFYING PRICE COMPARISON INITIATED ---")
-    if not search_results:
-        print("[PriceAgent] No search_results received — nothing to extract from.")
-        return {"price_data": [], "logs": ["No search results found."]}
-
-    cleaned_records = []
-    foreign_indicators = ["tashkent", "uzbekistan", ".uz/", ".uz", ".ru/", ".ru", ".pk/", ".pk", ".bd/", ".bd", ".ng/", ".ng", "dubai", "uae", ".ae/", ".ae"]
-    for r in search_results:
-        url = (r.get("url") or "").lower()
-        title = (r.get("title") or "").lower()
-        if is_article_or_news_url(url, title):
-            continue
-        if any(ignored in url for ignored in NON_SHOPPING_DOMAINS):
-            continue
-        if any(fi in url or fi in title for fi in foreign_indicators):
-            continue
-        if any(ext in url for ext in [".pdf", ".doc", ".docx", ".ppt"]):
-            continue
-        if any(p in url for p in ["/product-reviews/", "/customer-reviews/", "/reviews/", "/pb/", "/catalog/", "/categories/"]):
-            continue
-        cleaned_records.append(r)
-
-    filtered_records = cleaned_records
-    if not filtered_records:
-        return {"price_data": [], "logs": ["All non-shopping records filtered out."]}
-
-    product_pages = [r for r in filtered_records if is_specific_product_page(r.get("url", ""))]
-    other_pages = [
-        r for r in filtered_records
-        if r not in product_pages
-        and not any(p in (r.get("url") or "").lower() for p in ["/articles/", "/article/", "/knowledgebase/", "/gallery/", "/news/", "/blog/", "/blogs/"])
-        and not any(ns in (r.get("url") or "").lower() for ns in NON_SHOPPING_DOMAINS)
-    ]
-    # Dynamically include all bona-fide product pages and qualified shopping candidates (do not truncate to 10)
-    prioritized_records = (product_pages + other_pages) if product_pages else other_pages
-
     try:
+        search_results = state.get("search_results", [])
+        query = state.get("query", "")
+        
+        # Defensive budget extraction against NoneType or malformed state
+        budget_status = state.get("budget_status")
+        budget = budget_status.get("ceiling") if isinstance(budget_status, dict) else None
+        if not budget:
+            budget = state.get("budget")
+        if not budget:
+            try:
+                from agents.budget_advisor_agent import _extract_budget
+                budget = _extract_budget(query)
+            except Exception:
+                budget = None
+
+        print("\n--- OLLAMA INTENT-CLASSIFYING PRICE COMPARISON INITIATED ---")
+        if not search_results:
+            print("[PriceAgent] No search_results received — nothing to extract from.")
+            return {"price_data": [], "logs": ["No search results found."]}
+
+        cleaned_records = []
+        foreign_indicators = ["tashkent", "uzbekistan", ".uz/", ".uz", ".ru/", ".ru", ".pk/", ".pk", ".bd/", ".bd", ".ng/", ".ng", "dubai", "uae", ".ae/", ".ae"]
+        for r in search_results:
+            if not isinstance(r, dict):
+                continue
+            url = str(r.get("url") or "").lower()
+            title = str(r.get("title") or "").lower()
+            if is_article_or_news_url(url, title):
+                continue
+            if any(ignored in url for ignored in NON_SHOPPING_DOMAINS):
+                continue
+            if any(fi in url or fi in title for fi in foreign_indicators):
+                continue
+            if any(ext in url for ext in [".pdf", ".doc", ".docx", ".ppt"]):
+                continue
+            if any(p in url for p in ["/product-reviews/", "/customer-reviews/", "/reviews/", "/pb/", "/catalog/", "/categories/"]):
+                continue
+            cleaned_records.append(r)
+
+        filtered_records = cleaned_records
+        if not filtered_records:
+            return {"price_data": [], "logs": ["All non-shopping records filtered out."]}
+
+        product_pages = [r for r in filtered_records if is_specific_product_page(r.get("url", ""))]
+        other_pages = [
+            r for r in filtered_records
+            if r not in product_pages
+            and not any(p in str(r.get("url") or "").lower() for p in ["/articles/", "/article/", "/knowledgebase/", "/gallery/", "/news/", "/blog/", "/blogs/"])
+            and not any(ns in str(r.get("url") or "").lower() for ns in NON_SHOPPING_DOMAINS)
+        ]
+        # Dynamically include all bona-fide product pages and qualified shopping candidates
+        prioritized_records = (product_pages + other_pages) if product_pages else other_pages
+
         # ── Batch Processing Configuration ───────────────────────────────────────
         BATCH_SIZE = int(os.getenv("PRICE_AGENT_BATCH_SIZE", "10"))
-        batches = [
+        MAX_LLM_BATCHES = int(os.getenv("PRICE_AGENT_MAX_LLM_BATCHES", "2"))
+        all_batches = [
             prioritized_records[i : i + BATCH_SIZE]
             for i in range(0, len(prioritized_records), BATCH_SIZE)
         ]
+        batches = all_batches[:MAX_LLM_BATCHES]
 
         total_collected = len(search_results)
         total_batch_input = len(prioritized_records)
@@ -904,23 +913,24 @@ async def price_comparison_agent(state: Dict[str, Any]) -> Dict[str, Any]:
         print(f"\n[PriceAgent] === PRICE COMPARISON BATCHING INITIATED ===")
         print(f"[PriceAgent] Total search records collected: {total_collected}")
         print(f"[PriceAgent] Total records entering batch processing: {total_batch_input}")
-        print(f"[PriceAgent] Number of batches created: {num_batches} (Batch Size: {BATCH_SIZE})")
+        print(f"[PriceAgent] Number of LLM batches scheduled: {num_batches} (Batch Size: {BATCH_SIZE}, Max LLM: {MAX_LLM_BATCHES})")
 
         all_raw_extracted_rows: List[Dict[str, Any]] = []
         detected_category_counts: Dict[str, int] = {}
         batch_logs: List[str] = [
             f"Total search records collected: {total_collected}",
             f"Total records entering batch processing: {total_batch_input}",
-            f"Number of batches created: {num_batches}",
+            f"Number of LLM batches processed: {num_batches}",
         ]
 
         model_name = resolve_ollama_model()
         client = AsyncClient(host=settings.OLLAMA_HOST) if model_name and settings.OLLAMA_HOST else None
+        ollama_active = client is not None
 
         for batch_idx, batch_records in enumerate(batches, start=1):
             print(f"\n[PriceAgent] ---> Processing Batch {batch_idx}/{num_batches} ({len(batch_records)} records)...")
-            if client is None:
-                batch_logs.append(f"Batch {batch_idx}/{num_batches}: Ollama is not configured; deterministic extraction will be used.")
+            if not ollama_active:
+                batch_logs.append(f"Batch {batch_idx}/{num_batches}: Ollama bypassed; deterministic extraction will be used.")
                 continue
             context_list = []
             for i, r in enumerate(batch_records, start=1):
@@ -966,7 +976,7 @@ Records:
                         format="json",
                         options={"temperature": 0.1, "num_ctx": 4096, "num_predict": 1800},
                     ),
-                    timeout=90.0
+                    timeout=12.0
                 )
 
                 raw_content = response["message"]["content"].strip()
@@ -1003,6 +1013,7 @@ Records:
                 batch_logs.append(msg)
 
             except Exception as b_err:
+                ollama_active = False  # Trip circuit breaker so subsequent batches do not stall
                 err_msg = f"Batch {batch_idx}/{num_batches} exception/timeout ({b_err}). Engaging direct snippet extraction..."
                 print(f"[PriceAgent] {err_msg}")
                 batch_logs.append(err_msg)
