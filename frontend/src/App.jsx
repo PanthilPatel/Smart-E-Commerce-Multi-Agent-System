@@ -133,10 +133,19 @@ export default function App() {
         return () => subscription.unsubscribe();
     }, []);
 
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+            document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+        };
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+
     if (isAuthLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#070d19]">
-                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="min-h-screen flex items-center justify-center bg-[#09090B]">
+                <div className="w-8 h-8 border-4 border-[#E5C878] border-t-transparent rounded-full animate-spin" aria-label="Loading session" />
             </div>
         );
     }
@@ -146,6 +155,13 @@ export default function App() {
             <div className="relative min-h-screen text-[#F8FAFC] antialiased">
                 <div className="seamas-ambient" aria-hidden="true" />
                 <div className="seamas-grid" aria-hidden="true" />
+                <div 
+                    className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300"
+                    style={{
+                        background: 'radial-gradient(700px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 175, 55, 0.06), transparent 70%)'
+                    }}
+                    aria-hidden="true"
+                />
                 <div className="relative z-10 w-full h-full">
                     <RouteErrorBoundary>
                     <Routes>
