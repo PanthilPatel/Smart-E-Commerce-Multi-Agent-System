@@ -188,6 +188,28 @@ export const apiService = {
             console.warn('Failed to submit feedback:', error);
             return { status: 'error' };
         }
+    },
+
+    /**
+     * Contextual conversational assistant grounded in current search candidates
+     * @param {Object} params
+     * @param {string} params.message
+     * @param {string} [params.currentQuery]
+     * @param {Array} [params.products]
+     */
+    async askAssistant({ message, currentQuery = '', products = [] }) {
+        let headers = {};
+        try {
+            headers = await authHeaders();
+        } catch {
+            // 0-credit assistant allows guest access
+        }
+        const response = await apiClient.post('/api/assistant', {
+            message,
+            current_query: currentQuery,
+            products: products.slice(0, 8),
+        }, { headers, timeout: 15000 });
+        return response.data;
     }
 };
 

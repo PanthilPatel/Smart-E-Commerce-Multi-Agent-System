@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, User, Sparkles, Loader2, ArrowUpRight } from 'lucide-react';
+import { apiService } from '../services/api';
 
 const productName = (item) => item.product_name || item.title || 'Unnamed product';
 const verifiedPrice = (item) => {
@@ -16,9 +17,35 @@ const FEATURED_DEALS_BRIEF = [
     { name: 'Samsung Galaxy S24 Ultra (256GB)', store: 'Amazon India', price: 102999, mrp: 129999, discount: '21% OFF', query: 'Samsung Galaxy S24 Ultra 256GB' },
 ];
 
+function extractProductQuery(text) {
+    const clean = text.trim();
+    const patterns = [
+        /^(?:what(?:'s|\s+is)\s+(?:the\s+)?(?:rate|price|cost|mrp|deal)\s+(?:of\s+|for\s+)?)(.+)$/i,
+        /^(?:how\s+much\s+(?:is|does|for)\s+)(.+?)(?:\s+cost|\s+rate)?$/i,
+        /^(?:price\s+(?:of|for)\s+)(.+)$/i,
+        /^(?:rate\s+(?:of|for)\s+)(.+)$/i,
+        /^(?:cost\s+(?:of|for)\s+)(.+)$/i,
+        /^(?:search\s+(?:for\s+)?|find\s+(?:me\s+)?|show\s+(?:me\s+)?|look\s+for\s+)(.+)$/i,
+        /^(?:tell\s+me\s+about\s+|info\s+(?:on|about)\s+)(.+)$/i,
+        /^(?:compare\s+)(.+)$/i,
+        /^(?:recommend\s+(?:me\s+)?)(.+)$/i,
+    ];
+    for (const pat of patterns) {
+        const m = clean.match(pat);
+        if (m && m[1]) {
+            const candidate = m[1].replace(/[?.!"']+$/, '').trim();
+            if (candidate.length >= 3) return candidate;
+        }
+    }
+    const prodMatch = clean.match(/\b(iphone\s*\d*(?:\s*pro(?:\s*max)?)?|macbook(?:\s*air|\s*pro)?(?:\s*m\d)?|galaxy\s*s\d+(?:\s*ultra)?|oneplus\s*\d+\w*|sony\s*(?:wh|wf)?[- ]?\d{4}\w*|ipad(?:\s*air|\s*pro)?|pixel\s*\d+\w*)\b/i);
+    if (prodMatch) return prodMatch[1].trim();
+    return null;
+}
+
 function answerAssistantQuestion(question, items, currentQuery) {
     const q = question.toLowerCase();
     const products = items.slice(0, 8);
+    const suggested = extractProductQuery(question);
 
     // MODE 1: When products ARE on screen (Post-Search contextual comparison)
     if (products.length > 0) {
@@ -77,55 +104,85 @@ function answerAssistantQuestion(question, items, currentQuery) {
             }).join('\n\n');
             return { text: `Top choices compared side-by-side:\n\n${summary}` };
         }
+    }
 
+    // MODE 2: Specific product intelligence queries
+    if (suggested) {
+        const sLower = suggested.toLowerCase();
+        if (sLower.includes('iphone 17 pro max') || (sLower.includes('iphone 17') && sLower.includes('max'))) {
+            return {
+                text: `The iPhone 17 Pro Max is Apple's upcoming flagship generation. In India, launch pricing is anticipated to start around ₹1,44,900 – ₹1,59,900 based on standard flagship launch tiers. Current iPhone 16 Pro Max units retail starting at ~₹1,44,900. Click below to launch a live 7-agent market sweep across Indian retailers.`,
+                action: { label: `Search Live Market for '${suggested}'`, query: suggested }
+            };
+        }
+        if (sLower.includes('iphone 16 pro')) {
+            return {
+                text: `The Apple iPhone 16 Pro starts at approximately ₹1,12,900 to ₹1,19,900 in India across Croma, Flipkart, and Amazon India. Click below to run a live price sweep across all verified storefronts.`,
+                action: { label: `Search Live Market for '${suggested}'`, query: suggested }
+            };
+        }
+        if (sLower.includes('sony') && sLower.includes('xm5')) {
+            return {
+                text: `The Sony WH-1000XM5 wireless noise-cancelling headphones typically sell between ₹24,990 and ₹29,990 (MRP: ₹34,990) on Amazon India and Croma. Click below to run a live multi-agent price comparison.`,
+                action: { label: `Search Live Market for '${suggested}'`, query: suggested }
+            };
+        }
+        if (sLower.includes('macbook air')) {
+            return {
+                text: `The Apple MacBook Air M3 (16GB RAM) currently ranges between ₹1,04,990 and ₹1,14,900 across Flipkart and Amazon India with bank discounts. Click below to sweep current authorized seller listings.`,
+                action: { label: `Search Live Market for '${suggested}'`, query: suggested }
+            };
+        }
         return {
-            text: `I'm analyzing the ${products.length} live candidates for "${currentQuery}". Ask me about the lowest price, warranty differences, or card discounts.`
+            text: `For "${suggested}", current live market prices depend on active authorized seller inventory across Amazon India, Flipkart, and Croma. Click below to run a live 7-agent price and review verification sweep for "${suggested}".`,
+            action: { label: `Search Live Market for '${suggested}'`, query: suggested }
         };
     }
 
-    // MODE 2: Pre-Search / Idle Storefront Intelligence
+    // MODE 3: Pre-Search / Idle Storefront Intelligence
     if (/top 4|today|featured|deal|arbitrage|trending/.test(q)) {
         const dealLines = FEATURED_DEALS_BRIEF.map((d, i) => 
             `${i + 1}. ${d.name}\n   Best at ${d.store}: ₹${d.price.toLocaleString('en-IN')} (MRP: ₹${d.mrp.toLocaleString('en-IN')} · ${d.discount})`
         ).join('\n\n');
         return {
             text: `Here is today's verified arbitrage index across Indian retail platforms:\n\n${dealLines}\n\nAll prices verified via live DOM scraping with active inventory.`,
-            action: { label: 'Compare Sony WH-1000XM5 Deal ↗', query: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones' }
+            action: { label: 'Compare Sony WH-1000XM5 Deal', query: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones' }
         };
     }
 
     if (/card|bank|discount|offer|emi|cashback/.test(q)) {
         return {
             text: `Current Verified Bank & EMI Intelligence:\n\n💳 HDFC Bank & ICICI Bank: 10% Instant Discount (up to ₹2,500 on phones, ₹5,000 on laptops) across Amazon & Flipkart.\n💳 SBI Credit Cards: Flat ₹4,000 Instant Cashback on Apple & Samsung flagships at Croma & Reliance Digital.\n💳 No-Cost EMI: 3, 6, 9 & 12 months available with zero processing fees on all 4 featured deals.`,
-            action: { label: 'Search Flagship Phones under ₹70,000 ↗', query: 'Best 5G flagship smartphones under ₹70,000' }
+            action: { label: 'Search Flagship Phones under ₹70,000', query: 'Best 5G flagship smartphones under ₹70,000' }
         };
     }
 
     if (/warranty|guarantee|service/.test(q)) {
         return {
             text: `Brand Warranty & Support Standards:\n\n🛡️ Apple (iPhone & MacBook): 1-Year Limited Worldwide Warranty + 90 days complimentary phone support. Eligible for AppleCare+ within 60 days.\n🛡️ Samsung (Galaxy S24 Ultra): 1-Year Pan-India Warranty for phone, 6 months for battery & S-Pen.\n🛡️ Sony (WH-1000XM5): 1-Year Brand Replacement/Repair Warranty upon invoice upload.\n\nAll retailers indexed by SEAMAS are verified authorized sellers.`,
-            action: { label: 'Search Apple MacBook Air M3 ↗', query: 'MacBook Air M3 16GB' }
+            action: { label: 'Search Apple MacBook Air M3', query: 'MacBook Air M3 16GB' }
         };
     }
 
-    if (/phone|smartphone|30000|30,000|budget/.test(q)) {
+    // Explicit budget phone requests (only if explicitly mentioning under 30000 or budget phone)
+    if (/phones?\s+under\s+(?:rs\.?|₹)?\s*30[,.]?000|budget\s+phones?/.test(q) || (q.includes('30000') && q.includes('phone'))) {
         return {
             text: `Top Phone Recommendations Under ₹30,000:\n\n1. OnePlus Nord 4 5G (₹29,999) — Snapdragon 7+ Gen 3, All-metal unibody, 5500mAh, 100W charging.\n2. Poco F6 5G (₹27,999) — Snapdragon 8s Gen 3 flagship processor, 1.5K AMOLED.\n3. Samsung Galaxy A35 (₹28,999) — 4 OS updates, IP67 water resistance, Knox Security.`,
-            action: { label: 'Search Phones Under ₹30,000 ↗', query: 'Best 5G smartphones under ₹30,000' }
+            action: { label: 'Search Phones Under ₹30,000', query: 'Best 5G smartphones under ₹30,000' }
         };
     }
 
-    if (/laptop|macbook|coding/.test(q)) {
+    if (/coding\s+laptop|laptops?\s+under|budget\s+laptop/.test(q)) {
         return {
             text: `Top Laptop Recommendations:\n\n1. Apple MacBook Air M3 16GB (₹1,04,990) — 18-hour battery, silent fanless design, best-in-class trackpad.\n2. Lenovo IdeaPad Pro 5 (₹82,990) — Intel Core Ultra 7 with AI Boost, OLED 120Hz.\n3. ASUS Zenbook 14 OLED (₹79,990) — Ultraportable, 1.2kg, 75Wh battery.`,
-            action: { label: 'Search Coding Laptops ↗', query: 'Best coding and creator laptops under ₹85,000' }
+            action: { label: 'Search Coding Laptops', query: 'Best coding and creator laptops under ₹85,000' }
         };
     }
 
     // Default friendly assistant response
     return {
         text: `I'm your SEAMAS AI Shopping Assistant. Ask me to compare Today's Top 4 Deals, analyze bank card discounts & EMI options, or recommend the best smartphones, laptops, and audio gear under any budget!`,
-        action: { label: 'Compare Today’s Top 4 Deals ↗', query: 'Sony WH-1000XM5 vs Apple iPhone 16 Pro' }
+        action: { label: "Compare Today's Top 4 Deals", query: 'Sony WH-1000XM5 vs Apple iPhone 16 Pro' }
     };
 }
 
@@ -145,7 +202,7 @@ export default function AssistantChatDrawer({ isOpen, onClose, currentQuery, ite
             id: Date.now(),
             sender: 'bot',
             text: initialText,
-            action: items.length === 0 ? { label: "Compare Today's Top 4 Deals ↗", query: "Sony WH-1000XM5 vs Apple iPhone 16 Pro" } : null
+            action: items.length === 0 ? { label: "Compare Today's Top 4 Deals", query: "Sony WH-1000XM5 vs Apple iPhone 16 Pro" } : null
         }]);
     }, [isOpen, currentQuery, items]);
 
@@ -155,7 +212,7 @@ export default function AssistantChatDrawer({ isOpen, onClose, currentQuery, ite
 
     if (!isOpen) return null;
 
-    const handleSend = (e, overrideText) => {
+    const handleSend = async (e, overrideText) => {
         if (e) e.preventDefault();
         const userMsg = (overrideText ?? input).trim();
         if (!userMsg || loading) return;
@@ -164,19 +221,39 @@ export default function AssistantChatDrawer({ isOpen, onClose, currentQuery, ite
         setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: userMsg }]);
         setLoading(true);
 
-        setTimeout(() => {
-            try {
-                const reply = answerAssistantQuestion(userMsg, items, currentQuery);
+        try {
+            const data = await apiService.askAssistant({
+                message: userMsg,
+                currentQuery,
+                products: items
+            });
+
+            if (data?.reply) {
                 setMessages(prev => [...prev, { 
                     id: Date.now() + 1, 
                     sender: 'bot', 
-                    text: reply.text,
-                    action: reply.action 
+                    text: data.reply,
+                    action: data.suggested_query ? {
+                        label: data.action_label || `Search Live Market for '${data.suggested_query}'`,
+                        query: data.suggested_query
+                    } : null
                 }]);
-            } finally {
-                setLoading(false);
+                return;
             }
-        }, 300);
+        } catch (apiErr) {
+            console.warn('Live assistant API fallback triggered:', apiErr);
+        } finally {
+            setLoading(false);
+        }
+
+        // Offline / error client-side smart fallback
+        const reply = answerAssistantQuestion(userMsg, items, currentQuery);
+        setMessages(prev => [...prev, {
+            id: Date.now() + 1,
+            sender: 'bot',
+            text: reply.text,
+            action: reply.action
+        }]);
     };
 
     const quickPrompts = [
@@ -237,7 +314,7 @@ export default function AssistantChatDrawer({ isOpen, onClose, currentQuery, ite
                                         }}
                                         className="mt-3 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] hover:brightness-110 text-[#09090B] font-bold text-xs shadow-md transition-all active:scale-95"
                                     >
-                                        <span>{m.action.label}</span>
+                                        <span>{m.action.label ? m.action.label.replace(/\s*[↗\u2197]+$/, '') : 'Search Market'}</span>
                                         <ArrowUpRight className="w-3.5 h-3.5 text-[#09090B]" />
                                     </button>
                                 )}

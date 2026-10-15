@@ -21,3 +21,9 @@ class FeedbackRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500)
     rating: Literal["up", "down"]
     reason: Optional[str] = Field(None, max_length=500)
+
+
+class AssistantRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=500, description="The user's follow-up or assistant question")
+    current_query: Optional[str] = Field("", max_length=300, description="Active search query context if any")
+    products: list[dict] = Field(default_factory=list, description="Top products on screen for contextual grounding")
