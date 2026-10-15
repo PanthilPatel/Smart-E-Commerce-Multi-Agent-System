@@ -730,33 +730,34 @@ export default function UserDashboard() {
                 const localSaved = JSON.parse(localStorage.getItem('seamas_wishlist') || '[]');
                 if (localSaved.length > 0) {
                     for (const item of localSaved) {
-                        if (item.url) {
-                            await supabase.from('wishlists').upsert({
+                        const iTitle = item.product_name || item.title;
+                        const iUrl = item.url;
+                        if (iUrl) {
+                            await supabase.from('wishlists').delete().eq('user_id', uid).eq('url', iUrl);
+                            await supabase.from('wishlists').insert({
                                 user_id: uid,
-                                url: item.url,
-                                title: item.product_name || item.title,
-                                product_name: item.product_name || item.title,
+                                product_name: iTitle || 'Saved Product',
                                 extracted_price: item.extracted_price != null ? Number(item.extracted_price) : null,
                                 original_price: item.original_price != null ? Number(item.original_price) : null,
-                                marketplace: item.marketplace || 'Store',
+                                marketplace: item.marketplace || item.store || 'Store',
+                                url: iUrl,
                                 image_url: item.image_url || item.image || null,
                                 is_verified: !!item.is_verified,
-                                rating: item.rating != null ? Number(item.rating) : null,
-                            }, { onConflict: 'user_id,url' });
+                            });
                         }
                     }
-                    localStorage.removeItem('seamas_wishlist');
                 }
                 const { data: cloudWishlist } = await supabase
                     .from('wishlists')
                     .select('*')
                     .eq('user_id', uid)
                     .order('created_at', { ascending: false });
-                if (cloudWishlist) {
+                if (cloudWishlist && cloudWishlist.length > 0) {
                     setWishlistItems(cloudWishlist);
+                    localStorage.setItem('seamas_wishlist', JSON.stringify(cloudWishlist));
                 }
             } catch (wErr) {
-                console.error('Failed to load/migrate cloud wishlist', wErr);
+                console.warn('Failed to load/migrate cloud wishlist', wErr);
             }
         };
 
@@ -933,45 +934,58 @@ export default function UserDashboard() {
             showNotification('Saved to wishlist!', 'success');
         }
 
+        // Always persist to localStorage so wishlist state is never lost
+        try {
+            localStorage.setItem('seamas_wishlist', JSON.stringify(updated));
+        } catch (e) {
+            console.error('Failed to save wishlist in local storage', e);
+        }
+
         // Persist to Supabase if authenticated
         if (userSession?.id && !userSession.isGuest) {
             try {
                 if (exists) {
-                    const { error } = await supabase
-                        .from('wishlists')
-                        .delete()
-                        .eq('user_id', userSession.id)
-                        .eq('url', pUrl);
-                    if (error) throw error;
+                    if (pUrl) {
+                        await supabase
+                            .from('wishlists')
+                            .delete()
+                            .eq('user_id', userSession.id)
+                            .eq('url', pUrl);
+                    } else if (pTitle) {
+                        await supabase
+                            .from('wishlists')
+                            .delete()
+                            .eq('user_id', userSession.id)
+                            .eq('product_name', pTitle);
+                    }
                 } else {
+                    // Prevent duplicate rows by removing existing row first
+                    if (pUrl) {
+                        await supabase
+                            .from('wishlists')
+                            .delete()
+                            .eq('user_id', userSession.id)
+                            .eq('url', pUrl);
+                    }
                     const { error } = await supabase
                         .from('wishlists')
-                        .upsert({
+                        .insert({
                             user_id: userSession.id,
-                            url: pUrl,
-                            title: pTitle,
-                            product_name: product.product_name || pTitle,
+                            product_name: pTitle || 'Saved Product',
                             extracted_price: product.extracted_price != null ? Number(product.extracted_price) : null,
                             original_price: product.original_price != null ? Number(product.original_price) : null,
-                            marketplace: product.marketplace || 'Store',
+                            marketplace: product.marketplace || product.store || 'Store',
+                            url: pUrl || null,
                             image_url: product.image_url || product.image || null,
                             is_verified: !!product.is_verified,
-                            rating: product.rating != null ? Number(product.rating) : null,
-                        }, { onConflict: 'user_id,url' });
-                    if (error) throw error;
+                        });
+                    if (error) {
+                        console.warn('Supabase wishlist sync notice:', error.message);
+                    }
                 }
             } catch (err) {
-                console.error('Supabase wishlist persistence failed:', err);
-                // Rollback optimistic update on failure
-                setWishlistItems(previousItems);
-                showNotification('Could not sync wishlist with cloud. Changes reverted.', 'error');
-            }
-        } else {
-            // Unauthenticated/guest fallback in localStorage
-            try {
-                localStorage.setItem('seamas_wishlist', JSON.stringify(updated));
-            } catch (e) {
-                console.error('Failed to save wishlist in local storage', e);
+                console.warn('Supabase wishlist cloud sync failed, item preserved locally:', err);
+                // Do not revert optimistic update; local storage has the canonical state
             }
         }
     };
