@@ -707,6 +707,58 @@ export default function UserDashboard() {
             }
         }
 
+        const syncUserData = async (activeSession) => {
+            if (!activeSession?.user) return;
+            const uid = activeSession.user.id;
+
+            // Fetch search history
+            try {
+                const { data } = await supabase
+                    .from('search_history')
+                    .select('query')
+                    .eq('user_id', uid)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                if (data) setRecentQueries(data.map(r => r.query));
+            } catch (err) {
+                console.warn('Failed to load search history:', err);
+            }
+
+            // Fetch and migrate wishlist from Supabase
+            try {
+                const localSaved = JSON.parse(localStorage.getItem('seamas_wishlist') || '[]');
+                if (localSaved.length > 0) {
+                    for (const item of localSaved) {
+                        if (item.url) {
+                            await supabase.from('wishlists').upsert({
+                                user_id: uid,
+                                url: item.url,
+                                title: item.product_name || item.title,
+                                product_name: item.product_name || item.title,
+                                extracted_price: item.extracted_price != null ? Number(item.extracted_price) : null,
+                                original_price: item.original_price != null ? Number(item.original_price) : null,
+                                marketplace: item.marketplace || 'Store',
+                                image_url: item.image_url || item.image || null,
+                                is_verified: !!item.is_verified,
+                                rating: item.rating != null ? Number(item.rating) : null,
+                            }, { onConflict: 'user_id,url' });
+                        }
+                    }
+                    localStorage.removeItem('seamas_wishlist');
+                }
+                const { data: cloudWishlist } = await supabase
+                    .from('wishlists')
+                    .select('*')
+                    .eq('user_id', uid)
+                    .order('created_at', { ascending: false });
+                if (cloudWishlist) {
+                    setWishlistItems(cloudWishlist);
+                }
+            } catch (wErr) {
+                console.error('Failed to load/migrate cloud wishlist', wErr);
+            }
+        };
+
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (session) {
                 let actualTier = localTier;
@@ -736,6 +788,7 @@ export default function UserDashboard() {
                     credits: actualCredits,
                     renewAt: actualRenewAt
                 });
+                await syncUserData(session);
             } else if (!initialGuest) {
                 setAuthModalOpen(true);
             }
@@ -758,47 +811,7 @@ export default function UserDashboard() {
                     tier: actualTier,
                     credits: actualCredits
                 });
-                // Fetch search history
-                supabase.from('search_history').select('query').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(10)
-                    .then(({ data }) => {
-                        if (data) setRecentQueries(data.map(r => r.query));
-                    });
-
-                // Fetch and migrate wishlist from Supabase
-                (async () => {
-                    try {
-                        const localSaved = JSON.parse(localStorage.getItem('seamas_wishlist') || '[]');
-                        if (localSaved.length > 0) {
-                            for (const item of localSaved) {
-                                if (item.url) {
-                                    await supabase.from('wishlists').upsert({
-                                        user_id: session.user.id,
-                                        url: item.url,
-                                        title: item.product_name || item.title,
-                                        product_name: item.product_name || item.title,
-                                        extracted_price: item.extracted_price != null ? Number(item.extracted_price) : null,
-                                        original_price: item.original_price != null ? Number(item.original_price) : null,
-                                        marketplace: item.marketplace || 'Store',
-                                        image_url: item.image_url || item.image || null,
-                                        is_verified: !!item.is_verified,
-                                        rating: item.rating != null ? Number(item.rating) : null,
-                                    }, { onConflict: 'user_id,url' });
-                                }
-                            }
-                            localStorage.removeItem('seamas_wishlist');
-                        }
-                        const { data: cloudWishlist } = await supabase
-                            .from('wishlists')
-                            .select('*')
-                            .eq('user_id', session.user.id)
-                            .order('created_at', { ascending: false });
-                        if (cloudWishlist) {
-                            setWishlistItems(cloudWishlist);
-                        }
-                    } catch (wErr) {
-                        console.error('Failed to load/migrate cloud wishlist', wErr);
-                    }
-                })();
+                await syncUserData(session);
 
                 setAuthModalOpen(false);
 

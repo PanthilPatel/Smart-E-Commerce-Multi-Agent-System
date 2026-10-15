@@ -56,6 +56,15 @@ const PrivateRoute = ({ children }) => {
 };
 
 const PublicRoute = ({ children }) => {
+    let session = null;
+    try {
+        session = JSON.parse(localStorage.getItem('seamas_user_session') || 'null');
+    } catch {
+        localStorage.removeItem('seamas_user_session');
+    }
+    if (session?.isLoggedIn || session?.isGuest) {
+        return <Navigate to="/dashboard" replace />;
+    }
     return children;
 };
 
@@ -140,7 +149,7 @@ export default function App() {
                 <div className="relative z-10 w-full h-full">
                     <RouteErrorBoundary>
                     <Routes>
-                        <Route path="/" element={<Navigate to="/login" replace />} />
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         <Route
                             path="/login"
                             element={

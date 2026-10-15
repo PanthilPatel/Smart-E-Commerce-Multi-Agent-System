@@ -1,3 +1,4 @@
+import os
 import asyncio
 import httpx
 
@@ -8,6 +9,18 @@ async def terminal_chat():
     print("=" * 50)
 
     url = "http://127.0.0.1:8000/api/chat"
+    auth_token = os.getenv("SEAMAS_AUTH_TOKEN", "").strip()
+
+    if not auth_token:
+        try:
+            token_input = input("Enter Supabase Auth Bearer Token (or press Enter if dev bypass is active): ").strip()
+            if token_input:
+                auth_token = token_input.replace("Bearer ", "").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nClosing terminal session.")
+            return
+
+    headers = {"Authorization": f"Bearer {auth_token}"} if auth_token else {}
 
     try:
         async with httpx.AsyncClient(timeout=180.0) as client:
@@ -28,7 +41,7 @@ async def terminal_chat():
                 print("Sending request to FastAPI server and routing through agents...")
 
                 try:
-                    response = await client.post(url, json={"query": user_query})
+                    response = await client.post(url, json={"query": user_query}, headers=headers)
 
                     if response.status_code == 200:
                         data = response.json()
@@ -36,6 +49,8 @@ async def terminal_chat():
                         print("\n" + "="*25 + " SERVER RESPONSE " + "="*25)
                         print("\n" + data.get("final_output", "No compiled report available."))
                         print("\n" + "="*68)
+                    elif response.status_code == 401:
+                        print("\n[!] Authentication Required (401): Please set SEAMAS_AUTH_TOKEN in your environment or provide a valid Supabase bearer token.")
                     else:
                         print(f" Server Error ({response.status_code}): {response.text}")
 

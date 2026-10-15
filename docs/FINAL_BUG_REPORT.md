@@ -56,12 +56,12 @@ Reviewing test isolation after the user's safety instruction showed that three c
   2. Removed optimistic client balance mutations and client pre-checks. Backend remains sole authoritative debit gate.
   3. Enforced transparent HTTP 402 detail payloads returning `code: "insufficient_credits"`, `available_credits`, `required_credits`, and `user_ref`.
   4. Search credit costs enforced: Speed = 5 credits, Balanced (default, e.g. iPhone) = 10 credits, Accuracy = 20 credits.
-- **Verification:** Full backend suite passed 94/94 tests (`python -m pytest tests -q` in <5s), including 11 credit flow tests in `test_credit_flow.py` covering 1,470 credits vs 10, exact balance, zero balance, invalid types, and safe error details.
+- **Verification:** Full backend suite passed 97/97 tests (`pytest` / `python -m pytest` in <6s with root `pytest.ini` active), including 11 credit flow tests in `test_credit_flow.py` covering 1,470 credits vs 10, exact balance, zero balance, invalid types, and safe error details.
 - **Status:** RESOLVED IN CODE; live database persistence UNVERIFIED pending live QA database credentials.
 
 ## Verified
 
-- Guarded full backend suite: **94 passed, 0 failed** in <5s (hermetically isolated from external network timeouts); Supabase environment variables are blanked before app import and database clients are blocked in the autouse fixture.
+- Guarded full backend suite: **97 passed, 0 failed** in <6s with root `pytest.ini` active (hermetically isolated from external network timeouts); Supabase environment variables are blanked before app import and database clients are blocked in the autouse fixture.
 - Evaluation benchmark harness: **40/40 strict evaluation** (0.76 ms mean latency, 100.0% category, budget, and price verification integrity).
 - Frontend Node tests: **6 passed, 0 failed** (profile request resilience and credit/preferences validation).
 - Frontend ESLint: passed with zero warnings.
@@ -106,7 +106,7 @@ No database or external-service item above is marked PASS based only on mocks or
 
 ## Final regression results
 
-- Backend: **94 passed, 0 failed** in the full DB-isolated suite (`python -m pytest tests -q` in <5s, hermetically isolated from external network timeouts).
+- Backend: **97 passed, 0 failed** in the full DB-isolated suite (`pytest` / `python -m pytest` in <6s with root `pytest.ini` active, hermetically isolated from external network timeouts).
 - Benchmark: **40/40 strict evaluation** (0.76 ms mean latency, 100.0% category, budget, and price verification integrity).
 - Frontend Node tests: **6 passed, 0 failed** (profile request resilience and credit/preferences validation).
 - Frontend ESLint: passed with zero warnings.
