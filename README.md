@@ -143,7 +143,16 @@ python -m pytest backend/tests -v
 | `GET` | `/api/credits/me` | Retrieves the authenticated user's balance and subscription tier |
 | `POST` | `/api/create-order` | Creates a server-priced payment transaction and Razorpay payment link |
 | `POST` | `/api/verify-payment` | Verifies the authenticated user's server-owned payment transaction |
-# Production hardening notes
+| `POST` | `/api/assistant` | Real-time AI shopping assistant with deep bank discounts, EMI calculators, and store intelligence |
+| `POST` | `/api/feedback` | User relevance and satisfaction feedback tracking |
+| `GET` | `/health` | Liveness check probe |
+| `GET` | `/ready` | Supabase schema readiness probe |
+| `GET` | `/metrics` | Prometheus/operational performance metrics |
+| `POST` | `/api/webhooks/razorpay` | Idempotent Razorpay payment webhook handler |
+
+---
+
+## 🔒 Production Hardening Notes
 
 ## Environment setup
 
@@ -205,3 +214,24 @@ records only match when their source URLs match.
 Deploy FastAPI behind a TLS-terminating proxy with a production ASGI server, and
 serve the Vite `npm run build` output from a static host or web server. Apply the
 SQL migration and configure external credentials and URLs before deployment.
+
+---
+
+## 🌐 Deployment Guide
+
+### Frontend on Vercel
+1. In Vercel Project Settings:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `.` (or set to `frontend`)
+   - **Build Command**: `cd frontend && npm run build` (or `npm run build` if root is `frontend`)
+   - **Output Directory**: `frontend/dist` (or `dist` if root is `frontend`)
+2. Configure Environment Variables in Vercel:
+   - `VITE_API_BASE_URL`: URL of your deployed FastAPI backend (e.g. `https://your-api.onrender.com`)
+   - `VITE_SUPABASE_URL`: Your Supabase Project URL
+   - `VITE_SUPABASE_ANON_KEY`: Your Supabase Public Anonymous Key
+
+### Backend (Docker / Render / Railway)
+1. Deploy via `docker-compose.yml` or containerize via `backend/Dockerfile`.
+2. Configure all production environment variables from `backend/.env.production.example` in your hosting provider's secret store.
+3. Configure Redis (Upstash REST API) for distributed atomic rate limiting.
+4. Execute `supabase_production_migration.sql` on your Supabase project.
