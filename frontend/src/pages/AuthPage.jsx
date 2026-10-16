@@ -19,6 +19,8 @@ import {
     Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import NumberCounter from '../components/NumberCounter';
+import { use3DTilt } from '../hooks/useMotionPhysics';
 
 export default function AuthPage({ defaultIsLogin = true }) {
     const [isLogin, setIsLogin] = useState(defaultIsLogin);
@@ -184,11 +186,13 @@ export default function AuthPage({ defaultIsLogin = true }) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10 my-auto text-left">
                         
                         {/* Card 1: Indexed Marketplaces */}
-                        <div className="p-6 rounded-2xl bg-[#121215] border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-15px_rgba(0,0,0,0.7)] flex flex-col justify-between">
+                        <div className="p-6 rounded-2xl bg-[#121215] border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-15px_rgba(0,0,0,0.7)] flex flex-col justify-between card-interactive product-card-glow">
                             <div className="flex items-start justify-between">
                                 <div className="flex flex-col">
                                     <span className="text-[11px] uppercase tracking-wider text-zinc-400 font-medium">Verified Retail Partners</span>
-                                    <span className="text-3xl sm:text-4xl text-[#F4F4F6] font-bold mt-1.5 tabular-nums tracking-tight">18,450+</span>
+                                    <span className="text-3xl sm:text-4xl text-[#F4F4F6] font-bold mt-1.5 tabular-nums tracking-tight">
+                                        <NumberCounter value={18450} suffix="+" duration={1400} />
+                                    </span>
                                 </div>
                                 <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-zinc-300">
                                     <Share2 className="w-4 h-4" />
@@ -206,7 +210,7 @@ export default function AuthPage({ defaultIsLogin = true }) {
                         </div>
 
                         {/* Card 2: Featured Arbitrage Case Study */}
-                        <div className="p-6 rounded-2xl bg-[#121215] border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-15px_rgba(0,0,0,0.7)] flex flex-col justify-between">
+                        <div className="p-6 rounded-2xl bg-[#121215] border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-15px_rgba(0,0,0,0.7)] flex flex-col justify-between card-interactive product-card-glow">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-200">
@@ -222,8 +226,12 @@ export default function AuthPage({ defaultIsLogin = true }) {
                                 </span>
                             </div>
                             <div className="mt-4 flex items-baseline gap-2.5">
-                                <span className="text-2xl font-bold text-[#F4F4F6] tabular-nums tracking-tight">₹24,990</span>
-                                <span className="text-xs line-through text-zinc-500 tabular-nums">₹31,990</span>
+                                <span className="text-2xl font-bold text-[#F4F4F6] tabular-nums tracking-tight">
+                                    <NumberCounter value={24990} prefix="₹" duration={1200} />
+                                </span>
+                                <span className="text-xs line-through text-zinc-500 tabular-nums">
+                                    <NumberCounter value={31990} prefix="₹" duration={1000} />
+                                </span>
                                 <span className="text-[11px] font-semibold text-[#E6C762] bg-[#E6C762]/10 border border-[#E6C762]/25 px-2 py-0.5 rounded-md ml-auto tabular-nums">
                                     -22% Privileged Delta
                                 </span>

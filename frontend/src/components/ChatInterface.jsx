@@ -22,6 +22,7 @@ import {
     Truck,
     CreditCard
 } from 'lucide-react';
+import { useMagneticButton } from '../hooks/useMotionPhysics';
 
 const SONY_XM5_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
@@ -429,6 +430,7 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
     const [isListening, setIsListening] = useState(false);
     const [currentSuggestions, setCurrentSuggestions] = useState(ALL_SUGGESTIONS.slice(0, 3));
     const inputRef = useRef(null);
+    const magneticBtn = useMagneticButton(0.24);
 
     // Keyboard shortcut to focus search input: Ctrl/Cmd + /
     useEffect(() => {
@@ -664,9 +666,11 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                             <Command className="h-2.5 w-2.5" strokeWidth={2} />/
                         </kbd>
 
-                        {/* Primary High-Craft Brushed Champagne Gold & Pearl CTA Button */}
+                        {/* Primary High-Craft Brushed Champagne Gold & Pearl CTA Button with Magnetic Physics */}
                         <button
                             type="submit"
+                            onMouseMove={magneticBtn.onMouseMove}
+                            onMouseLeave={magneticBtn.onMouseLeave}
                             onClick={(e) => {
                                 if (!input.trim() && !loading) {
                                     e.preventDefault();
@@ -674,7 +678,7 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                                 }
                             }}
                             disabled={loading}
-                            className="group relative inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-xl px-5 py-2.5 text-sm font-semibold text-[#09090B] bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] shadow-[0_1px_0_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-4px_rgba(212,175,55,0.35)] hover:brightness-110 transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed opacity-95"
+                            className="group relative inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-xl px-5 py-2.5 text-sm font-semibold text-[#09090B] bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] shadow-[0_1px_0_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-4px_rgba(212,175,55,0.35)] hover:brightness-110 transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed opacity-95 btn-tactile-spring"
                         >
                             <span>{loading ? "Orchestrating…" : "Search Market"}</span>
                             <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[#09090B]" strokeWidth={2.2} />
@@ -692,7 +696,7 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                                     key={s.label}
                                     type="button"
                                     onClick={() => handleChipClick(s.label)}
-                                    className="group inline-flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.02] px-3 py-1 text-xs text-zinc-300 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_15px_rgba(230,199,98,0.15)] hover:border-[#E6C762]/40 hover:bg-[#E6C762]/[0.05] hover:text-white"
+                                    className="group inline-flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.02] px-3 py-1 text-xs text-zinc-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(230,199,98,0.15)] hover:border-[#E6C762]/40 hover:bg-[#E6C762]/[0.05] hover:text-white interactive-chip-spring"
                                 >
                                     <Sparkles className="h-3 w-3 text-zinc-500 transition-colors group-hover:text-[#E6C762]" strokeWidth={1.75} />
                                     {s.label}
@@ -722,7 +726,7 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                                 key={dept.id}
                                 type="button"
                                 onClick={() => handleChipClick(dept.query)}
-                                className="group relative rounded-xl bg-[#121215] border border-white/[0.08] hover:border-[#E6C762]/50 hover:bg-[#18181C] p-3 text-left transition-all duration-200 hover:-translate-y-0.5 shadow-sm flex flex-col justify-between"
+                                className="group relative rounded-xl bg-[#121215] border border-white/[0.08] hover:border-[#E6C762]/50 hover:bg-[#18181C] p-3 text-left transition-all duration-200 shadow-sm flex flex-col justify-between card-interactive product-card-glow"
                             >
                                 <div>
                                     <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] group-hover:border-[#E6C762]/30 group-hover:bg-[#E6C762]/10 flex items-center justify-center transition-colors mb-2 text-[#E6C762]">

@@ -18,6 +18,8 @@ import {
     Scale
 } from 'lucide-react';
 import PriceWatchdogModal from './PriceWatchdogModal';
+import NumberCounter from './NumberCounter';
+import { use3DTilt } from '../hooks/useMotionPhysics';
 
 /**
  * Returns store color and trust metadata for e-commerce store badges.
@@ -283,10 +285,14 @@ function ProductHeroCard({
         return found;
     }, [allItems, hasPrice, marketplace, price]);
 
+    const heroTilt = use3DTilt(3.5);
+
     return (
         <div 
             onClick={() => onCardClick && onCardClick(product)}
-            className="col-span-full w-full rounded-2xl bg-[#121215]/90 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_24px_48px_-15px_rgba(0,0,0,0.85)] relative overflow-hidden flex flex-col gap-6 mb-6 group cursor-pointer text-left hover:border-white/20 transition-all"
+            onMouseMove={heroTilt.onMouseMove}
+            onMouseLeave={heroTilt.onMouseLeave}
+            className="col-span-full w-full rounded-2xl bg-[#121215]/90 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_24px_48px_-15px_rgba(0,0,0,0.85)] relative overflow-hidden flex flex-col gap-6 mb-6 group cursor-pointer text-left hover:border-white/20 transition-all product-card-glow"
         >
             {/* Subtle warm champagne specular lighting */}
             <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-b from-[#E6C762]/[0.08] to-transparent blur-3xl pointer-events-none" />
@@ -408,11 +414,11 @@ function ProductHeroCard({
                     <div className="p-4 rounded-xl bg-black/50 border border-white/[0.08] flex flex-wrap items-center justify-between gap-3 shadow-inner">
                         <div className="flex items-baseline gap-3">
                             <span className="text-3xl sm:text-4xl font-bold text-[#F4F4F6] tabular-nums tracking-tight">
-                                {hasPrice ? `₹${price.toLocaleString('en-IN')}` : 'Price on Store'}
+                                {hasPrice ? <NumberCounter value={price} prefix="₹" /> : 'Price on Store'}
                             </span>
                             {hasPrice && original && original > price && (
                                 <span className="text-sm sm:text-base line-through text-zinc-500 tabular-nums">
-                                    ₹{original.toLocaleString('en-IN')}
+                                    <NumberCounter value={original} prefix="₹" />
                                 </span>
                             )}
                             {discount > 0 && (
@@ -574,10 +580,13 @@ function ProductCard({
 
     const discount = hasPrice && original && original > price ? Math.round(((original - price) / original) * 100) : 0;
     const isOverBudget = product.status === 'Out of Budget';
+    const cardTilt = use3DTilt(5);
 
     return (
         <article
             onClick={() => onCardClick && onCardClick(product)}
+            onMouseMove={cardTilt.onMouseMove}
+            onMouseLeave={cardTilt.onMouseLeave}
             className="card-reveal card-interactive product-card-glow group relative flex flex-col justify-between overflow-hidden rounded-2xl cursor-pointer bg-[#121215]/90 backdrop-blur-xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-12px_rgba(0,0,0,0.85)] hover:border-white/[0.2] transition-all"
         >
             {/* Studio-White Pedestal for Real Photos or Obsidian Schematic for Fallbacks */}
@@ -694,11 +703,11 @@ function ProductCard({
                         <div className="min-w-0">
                             <div className="flex items-baseline gap-2 flex-wrap">
                                 <span className="font-display text-xl font-bold tracking-tight text-white tabular-nums">
-                                    {hasPrice ? `₹${price.toLocaleString('en-IN')}` : 'Price on Store'}
+                                    {hasPrice ? <NumberCounter value={price} prefix="₹" /> : 'Price on Store'}
                                 </span>
                                 {hasPrice && original && original > price && (
                                     <span className="text-xs text-zinc-500 line-through tabular-nums">
-                                        ₹{original.toLocaleString('en-IN')}
+                                        <NumberCounter value={original} prefix="₹" />
                                     </span>
                                 )}
                             </div>

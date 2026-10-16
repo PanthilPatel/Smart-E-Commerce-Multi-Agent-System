@@ -9,6 +9,7 @@ import {
     Terminal, 
     Server
 } from 'lucide-react';
+import NumberCounter from './NumberCounter';
 
 export default function AnalyticsPanel({ logs = [], recordsCount = 0, systemStatus = null }) {
     const isApiOk = systemStatus?.api === 'operational' || !systemStatus?.api || systemStatus?.api === 'ok';
@@ -73,7 +74,11 @@ export default function AnalyticsPanel({ logs = [], recordsCount = 0, systemStat
                     </div>
                     <div className="mt-3">
                         <div className="font-display text-3xl font-bold text-white tabular-nums">
-                            {recordsCount > 0 ? recordsCount.toLocaleString('en-IN') : '18,450+'}
+                            {recordsCount > 0 ? (
+                                <NumberCounter value={recordsCount} />
+                            ) : (
+                                <NumberCounter value={18450} suffix="+" />
+                            )}
                         </div>
                         <div className="text-[11px] text-zinc-400 mt-1">Cross-marketplace DOM cache</div>
                     </div>

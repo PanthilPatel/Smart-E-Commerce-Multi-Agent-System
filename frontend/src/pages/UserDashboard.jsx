@@ -15,6 +15,7 @@ import AuthModal from '../components/AuthModal';
 import SubscriptionModal from '../components/SubscriptionModal';
 import AssistantChatDrawer from '../components/AssistantChatDrawer';
 import PriceChart from '../components/PriceChart';
+import NumberCounter from '../components/NumberCounter';
 import {
     Sparkles,
     Compass,
@@ -229,27 +230,33 @@ function AgentNode({ agent, state, metrics }) {
     const duration = metrics?.duration || agent.defaultDuration;
 
     return (
-        <div className={`p-3.5 rounded-2xl flex flex-col justify-between gap-2.5 transition-all duration-300 relative overflow-hidden text-left ${
+        <div className={`p-3.5 rounded-2xl flex flex-col justify-between gap-2.5 transition-all duration-300 relative overflow-hidden text-left card-interactive ${
             isRunning 
-                ? 'bg-[#E6C762]/[0.06] border border-[#E6C762]/60 shadow-[0_0_24px_rgba(230,199,98,0.2)] ring-1 ring-[#E6C762]/30' 
+                ? 'bg-[#E6C762]/[0.08] border border-[#E6C762]/70 shadow-[0_0_28px_rgba(230,199,98,0.3)] ring-1 ring-[#E6C762]/40 -translate-y-1' 
                 : isCompleted 
-                    ? 'bg-[#121215] border border-[#34D399]/30 shadow-[0_0_20px_rgba(52,211,153,0.12)] hover:border-[#34D399]/50' 
+                    ? 'bg-[#121215] border border-[#34D399]/30 shadow-[0_0_20px_rgba(52,211,153,0.12)] hover:border-[#34D399]/50 hover:-translate-y-0.5' 
                 : isError 
                     ? 'bg-rose-500/[0.06] border border-rose-500/40 text-rose-300' 
-                    : 'bg-[#121215] border border-white/[0.07] hover:border-white/15'
+                    : 'bg-[#121215] border border-white/[0.07] hover:border-white/20 hover:-translate-y-0.5'
         }`}>
             {isRunning && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E6C762]/10 to-transparent animate-shimmer pointer-events-none" />
+                <>
+                    <div className="neural-ring-ping" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#E6C762]/15 to-transparent animate-shimmer pointer-events-none" />
+                </>
             )}
-            <div className="flex items-center justify-between">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-colors ${
+            <div className="flex items-center justify-between relative z-10">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-all duration-300 relative ${
                     isRunning 
-                        ? 'bg-[#E6C762]/15 border-[#E6C762]/50 text-[#E6C762]' 
+                        ? 'bg-[#E6C762]/20 border-[#E6C762]/60 text-[#E6C762] shadow-[0_0_12px_rgba(230,199,98,0.4)]' 
                         : isCompleted 
                             ? 'bg-[#34D399]/15 border-[#34D399]/30 text-[#34D399]' 
                             : 'bg-white/[0.04] border-white/5 text-zinc-400'
                 }`}>
-                    <Icon className="w-4 h-4" strokeWidth={1.75} />
+                    <Icon className="w-4 h-4 relative z-10" strokeWidth={1.75} />
+                    {isRunning && (
+                        <div className="absolute inset-0 rounded-xl border border-[#E6C762]/60 animate-spin pointer-events-none" style={{ animationDuration: '3s' }} />
+                    )}
                 </div>
                 {isCompleted ? (
                     <span className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-[#34D399]/15 border border-[#34D399]/30 text-[#34D399] font-semibold">
@@ -265,15 +272,15 @@ function AgentNode({ agent, state, metrics }) {
                     </span>
                 )}
             </div>
-            <div>
+            <div className="relative z-10">
                 <p className="font-display text-xs font-semibold text-white leading-tight truncate">{agent.name}</p>
                 <p className="text-[11px] text-zinc-400 truncate mt-0.5 leading-snug">{agent.role}</p>
             </div>
-            <div className="flex items-center gap-1.5 font-mono text-[10px] font-semibold pt-1 border-t border-white/[0.04]">
+            <div className="flex items-center gap-1.5 font-mono text-[10px] font-semibold pt-1 border-t border-white/[0.04] relative z-10">
                 {isRunning ? (
                     <>
                         <span className="w-2 h-2 rounded-full bg-[#E6C762] animate-ping" />
-                        <span className="text-[#E6C762]">ACTIVE SWARM...</span>
+                        <span className="text-[#E6C762] tracking-wider">ACTIVE SWARM...</span>
                     </>
                 ) : isCompleted ? (
                     <>
@@ -1354,7 +1361,7 @@ export default function UserDashboard() {
                                                 </div>
                                                 <div className="font-display text-lg text-white">
                                                     {completedCount}/{AGENT_LIST.length}{' '}
-                                                    <span className="text-zinc-500">· {progressPercent}%</span>
+                                                    <span className="text-[#E6C762] font-semibold">· <NumberCounter value={progressPercent} suffix="%" duration={500} /></span>
                                                 </div>
                                             </div>
                                             <div className="relative h-12 w-12 select-none">
@@ -1391,6 +1398,7 @@ export default function UserDashboard() {
                                             <defs>
                                                 <linearGradient id="edge-grad" x1="0" x2="1" y1="0" y2="0">
                                                     <stop offset="0" stopColor="#E6C762" stopOpacity="0.4" />
+                                                    <stop offset="0.5" stopColor="#38BDF8" stopOpacity="0.7" />
                                                     <stop offset="1" stopColor="#34D399" stopOpacity="0.4" />
                                                 </linearGradient>
                                             </defs>
@@ -1398,10 +1406,20 @@ export default function UserDashboard() {
                                                 d="M 60 50 C 220 10, 380 90, 540 50 S 860 10, 1020 50 S 1140 90, 1180 50"
                                                 fill="none"
                                                 stroke="url(#edge-grad)"
-                                                strokeWidth="1"
-                                                className={loading ? 'edge-flow' : ''}
-                                                opacity="0.5"
+                                                strokeWidth={loading ? "1.5" : "1"}
+                                                className={loading ? 'edge-flow-active' : ''}
+                                                opacity={loading ? "0.85" : "0.35"}
                                             />
+                                            {loading && (
+                                                <path
+                                                    d="M 60 50 C 220 90, 380 10, 540 50 S 860 90, 1020 50 S 1140 10, 1180 50"
+                                                    fill="none"
+                                                    stroke="rgba(230, 199, 98, 0.35)"
+                                                    strokeWidth="1"
+                                                    strokeDasharray="4 8"
+                                                    className="edge-flow-active"
+                                                />
+                                            )}
                                         </svg>
                                         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
                                             {AGENT_LIST.map((agent) => {

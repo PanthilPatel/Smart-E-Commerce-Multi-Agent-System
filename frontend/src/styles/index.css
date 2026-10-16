@@ -453,14 +453,21 @@ kbd {
 }
 
 /* ═══════════════════════════════════════════════
-   PRODUCT CARD HOVER GLOW
+   PRODUCT CARD 3D TILT & SPECULAR HOVER GLOW
    ═══════════════════════════════════════════════ */
 
 .product-card-glow {
     position: relative;
+    transform-style: preserve-3d;
+    will-change: transform;
     transition:
-        transform 0.3s var(--ease-spring),
-        border-color 0.3s var(--ease-smooth);
+        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.3s var(--ease-smooth),
+        box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card-glow.is-tilting {
+    transition: transform 0.08s ease-out, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .product-card-glow::before {
@@ -468,21 +475,106 @@ kbd {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-            hsl(187 92% 55% / 0.12),
-            transparent 60%);
+    background: radial-gradient(450px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+            rgba(230, 199, 98, 0.16),
+            hsl(187 92% 55% / 0.08) 35%,
+            transparent 65%);
     opacity: 0;
-    transition: opacity 0.4s var(--ease-smooth);
+    transition: opacity 0.35s var(--ease-smooth);
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
+}
+
+.product-card-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 40%, rgba(230, 199, 98, 0.04) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .product-card-glow:hover::before {
     opacity: 1;
 }
 
-.product-card-glow:hover {
-    transform: translateY(-4px) scale(1.01);
+.product-card-glow:hover::after {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════
+   NEURAL SWARM & AGENT MATRIX BEAMS
+   ═══════════════════════════════════════════════ */
+
+@keyframes edge-flow-fast {
+    0% {
+        stroke-dashoffset: 200;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.edge-flow-active {
+    stroke-dasharray: 8 6;
+    animation: edge-flow-fast 1.2s linear infinite;
+}
+
+@keyframes neural-pulse-ring {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.35);
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+}
+
+.neural-ring-ping {
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 1.5px solid rgba(230, 199, 98, 0.7);
+    animation: neural-pulse-ring 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════
+   MAGNETIC BUTTON & FLUID SPRING PHYSICS
+   ═══════════════════════════════════════════════ */
+
+.btn-tactile-spring {
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+
+.btn-tactile-spring:hover {
+    transform: translateY(-2.5px) scale(1.02);
+}
+
+.btn-tactile-spring:active {
+    transform: translateY(0.5px) scale(0.97);
+}
+
+.interactive-chip-spring {
+    transition: all 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.interactive-chip-spring:hover {
+    transform: translateY(-3px) scale(1.03);
+}
+
+.interactive-chip-spring:active {
+    transform: translateY(0) scale(0.98);
 }
 
 /* ═══════════════════════════════════════════════
