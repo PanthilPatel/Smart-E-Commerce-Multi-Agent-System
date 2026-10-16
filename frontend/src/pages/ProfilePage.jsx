@@ -564,7 +564,7 @@ export default function ProfilePage() {
                                     className="flex-1 py-3 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider bg-gradient-to-b from-[#F5E6B3] via-[#E5C878] to-[#C9A449] hover:brightness-110 text-[#09090B] transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
                                 >
                                     <Zap className="w-4 h-4 fill-[#09090B]" />
-                                    Upgrade to Pro (₹100/mo)
+                                    Upgrade to Pro (₹999/mo)
                                 </button>
                             ) : (
                                 <button

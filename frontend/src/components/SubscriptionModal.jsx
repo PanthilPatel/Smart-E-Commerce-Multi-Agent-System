@@ -130,7 +130,7 @@ export default function SubscriptionModal({ isOpen, onClose, userSession, initia
 
                         <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 mb-6">
                             <div className="flex items-baseline gap-1.5 mb-4">
-                                <span className="text-3xl font-black text-white font-display">₹100</span>
+                                <span className="text-3xl font-black text-white font-display">₹999</span>
                                 <span className="text-zinc-400 text-sm font-medium">/ Month</span>
                             </div>
 

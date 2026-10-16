@@ -417,11 +417,11 @@ async def fetch_my_credits(user: dict = Depends(current_user)):
 
 
 TOPUP_PACKS = {
-    "booster_100": {"credits": 100, "amount": 100, "name": "Booster Mini (+100 Credits)"},
-    "booster_250": {"credits": 250, "amount": 200, "name": "Booster Pro (+250 Credits)"},
-    "booster_500": {"credits": 500, "amount": 300, "name": "Booster Ultra (+500 Credits)"},
+    "booster_100": {"credits": 100, "amount": 10000, "name": "Booster Mini (+100 Credits)"},
+    "booster_250": {"credits": 250, "amount": 20000, "name": "Booster Pro (+250 Credits)"},
+    "booster_500": {"credits": 500, "amount": 30000, "name": "Booster Ultra (+500 Credits)"},
 }
-PLANS = {"pro_monthly": {"credits": 500, "amount": 100, "name": "SEAMAS Pro Monthly Subscription"}}
+PLANS = {"pro_monthly": {"credits": 500, "amount": 99900, "name": "SEAMAS Pro Monthly Subscription"}}
 
 
 def get_razorpay_client():
