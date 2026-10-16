@@ -18,8 +18,7 @@ import {
     Scale
 } from 'lucide-react';
 import PriceWatchdogModal from './PriceWatchdogModal';
-import NumberCounter from './NumberCounter';
-import { use3DTilt } from '../hooks/useMotionPhysics';
+import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 
 /**
  * Returns store color and trust metadata for e-commerce store badges.
@@ -285,13 +284,30 @@ function ProductHeroCard({
         return found;
     }, [allItems, hasPrice, marketplace, price]);
 
-    const heroTilt = use3DTilt(3.5);
+    const animatedPrice = useAnimatedNumber(price);
+
+    const handleMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+        e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -3;
+        const rotateY = ((x - centerX) / centerX) * 3;
+        e.currentTarget.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+    };
+    const handleMouseLeave = (e) => {
+        e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+    };
 
     return (
-        <div 
+        <article 
             onClick={() => onCardClick && onCardClick(product)}
-            onMouseMove={heroTilt.onMouseMove}
-            onMouseLeave={heroTilt.onMouseLeave}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{ transition: 'transform 0.25s cubic-bezier(0.2, 0, 0, 1)' }}
             className="col-span-full w-full rounded-2xl bg-[#121215]/90 backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_24px_48px_-15px_rgba(0,0,0,0.85)] relative overflow-hidden flex flex-col gap-6 mb-6 group cursor-pointer text-left hover:border-white/20 transition-all product-card-glow"
         >
             {/* Subtle warm champagne specular lighting */}
@@ -354,14 +370,17 @@ function ProductHeroCard({
                                 e.stopPropagation();
                                 if (onWishlistToggle) onWishlistToggle(product);
                             }}
-                            className={`absolute top-3 right-3 p-2 rounded-full border transition-all backdrop-blur-md ${
+                            className={`absolute top-3 right-3 p-2 rounded-full border transition-all backdrop-blur-md relative ${
                                 isWishlisted 
                                     ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' 
                                     : 'bg-black/60 border-white/10 text-zinc-300 hover:text-white hover:bg-black/80'
                             }`}
                             aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                         >
-                            <Heart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-rose-400 text-rose-400' : ''}`} />
+                            {isWishlisted && (
+                                <span className="absolute inset-0 rounded-full border-2 border-rose-400/80 animate-ping pointer-events-none" />
+                            )}
+                            <Heart className={`w-3.5 h-3.5 relative z-10 ${isWishlisted ? 'fill-rose-400 text-rose-400 scale-110' : ''}`} />
                         </button>
 
                         {/* Bottom-Left Savings Pill */}
@@ -414,11 +433,11 @@ function ProductHeroCard({
                     <div className="p-4 rounded-xl bg-black/50 border border-white/[0.08] flex flex-wrap items-center justify-between gap-3 shadow-inner">
                         <div className="flex items-baseline gap-3">
                             <span className="text-3xl sm:text-4xl font-bold text-[#F4F4F6] tabular-nums tracking-tight">
-                                {hasPrice ? <NumberCounter value={price} prefix="₹" /> : 'Price on Store'}
+                                {hasPrice ? (animatedPrice > 0 ? `₹${animatedPrice.toLocaleString('en-IN')}` : `₹${price.toLocaleString('en-IN')}`) : 'Price on Store'}
                             </span>
                             {hasPrice && original && original > price && (
                                 <span className="text-sm sm:text-base line-through text-zinc-500 tabular-nums">
-                                    <NumberCounter value={original} prefix="₹" />
+                                    ₹{original.toLocaleString('en-IN')}
                                 </span>
                             )}
                             {discount > 0 && (
@@ -533,7 +552,7 @@ function ProductHeroCard({
                 </div>
 
             </div>
-        </div>
+        </article>
     );
 }
 
@@ -545,6 +564,7 @@ function ProductCard({
     onCardClick, 
     onWatchdogClick, 
     priority = false, 
+    index = 0,
     isWishlisted = false, 
     onWishlistToggle,
     isCompared = false,
@@ -580,13 +600,33 @@ function ProductCard({
 
     const discount = hasPrice && original && original > price ? Math.round(((original - price) / original) * 100) : 0;
     const isOverBudget = product.status === 'Out of Budget';
-    const cardTilt = use3DTilt(5);
+    const animatedPrice = useAnimatedNumber(price);
+
+    const handleMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+        e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -3;
+        const rotateY = ((x - centerX) / centerX) * 3;
+        e.currentTarget.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`;
+    };
+    const handleMouseLeave = (e) => {
+        e.currentTarget.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+    };
 
     return (
         <article
             onClick={() => onCardClick && onCardClick(product)}
-            onMouseMove={cardTilt.onMouseMove}
-            onMouseLeave={cardTilt.onMouseLeave}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{ 
+                animationDelay: `${Math.min(index * 70, 500)}ms`,
+                transition: 'transform 0.25s cubic-bezier(0.2, 0, 0, 1)'
+            }}
             className="card-reveal card-interactive product-card-glow group relative flex flex-col justify-between overflow-hidden rounded-2xl cursor-pointer bg-[#121215]/90 backdrop-blur-xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_20px_40px_-12px_rgba(0,0,0,0.85)] hover:border-white/[0.2] transition-all"
         >
             {/* Studio-White Pedestal for Real Photos or Obsidian Schematic for Fallbacks */}
@@ -630,7 +670,10 @@ function ProductCard({
                     }`}
                     aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
-                    <Heart className={`h-3.5 w-3.5 transition-transform duration-300 ${isWishlisted ? 'fill-rose-400 text-rose-400' : ''}`} strokeWidth={1.75} />
+                    {isWishlisted && (
+                        <span className="absolute inset-0 rounded-full border-2 border-rose-400/80 animate-ping pointer-events-none" />
+                    )}
+                    <Heart className={`h-3.5 w-3.5 transition-transform duration-300 ${isWishlisted ? 'fill-rose-400 text-rose-400 scale-110' : ''}`} strokeWidth={1.75} />
                 </button>
 
                 {/* Bottom-Left High-Impact Savings Pill */}
@@ -703,11 +746,11 @@ function ProductCard({
                         <div className="min-w-0">
                             <div className="flex items-baseline gap-2 flex-wrap">
                                 <span className="font-display text-xl font-bold tracking-tight text-white tabular-nums">
-                                    {hasPrice ? <NumberCounter value={price} prefix="₹" /> : 'Price on Store'}
+                                    {hasPrice ? (animatedPrice > 0 ? `₹${animatedPrice.toLocaleString('en-IN')}` : `₹${price.toLocaleString('en-IN')}`) : 'Price on Store'}
                                 </span>
                                 {hasPrice && original && original > price && (
                                     <span className="text-xs text-zinc-500 line-through tabular-nums">
-                                        <NumberCounter value={original} prefix="₹" />
+                                        ₹{original.toLocaleString('en-IN')}
                                     </span>
                                 )}
                             </div>
@@ -1075,6 +1118,7 @@ export default function ProductGrid({ items = [], query = '', ready = true, onCa
                             key={idx}
                             product={item}
                             priority={idx < 3}
+                            index={idx}
                             onCardClick={onCardClick}
                             onWatchdogClick={(p) => setWatchdogProduct(p)}
                             isWishlisted={isProductWishlisted(item)}

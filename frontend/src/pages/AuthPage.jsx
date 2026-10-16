@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NumberCounter from '../components/NumberCounter';
-import { use3DTilt } from '../hooks/useMotionPhysics';
 
 export default function AuthPage({ defaultIsLogin = true }) {
     const [isLogin, setIsLogin] = useState(defaultIsLogin);

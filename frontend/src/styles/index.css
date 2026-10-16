@@ -460,14 +460,7 @@ kbd {
     position: relative;
     transform-style: preserve-3d;
     will-change: transform;
-    transition:
-        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-        border-color 0.3s var(--ease-smooth),
-        box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.product-card-glow.is-tilting {
-    transition: transform 0.08s ease-out, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), border-color 0.3s ease, box-shadow 0.25s ease;
 }
 
 .product-card-glow::before {
@@ -475,14 +468,15 @@ kbd {
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    background: radial-gradient(450px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-            rgba(230, 199, 98, 0.16),
-            hsl(187 92% 55% / 0.08) 35%,
-            transparent 65%);
+    background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(229, 200, 120, 0.15), transparent 70%);
     opacity: 0;
-    transition: opacity 0.35s var(--ease-smooth);
+    transition: opacity 0.3s ease;
     pointer-events: none;
     z-index: 1;
+}
+
+.product-card-glow:hover::before {
+    opacity: 1;
 }
 
 .product-card-glow::after {

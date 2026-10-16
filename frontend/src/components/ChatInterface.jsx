@@ -424,13 +424,33 @@ const RETAILER_PARTNERS = [
     { name: 'Apple Authorised', badge: 'MFi Genuine' },
 ];
 
+const SCAN_TICKER_MESSAGES = [
+    "01 Orchestrator: Parsing intent constraints...",
+    "02 Search: Scanning Amazon, Flipkart, Croma...",
+    "03 Pricing: Extracting live JSON-LD offers...",
+    "04 Reviews: Distilling verified sentiment..."
+];
+
 export default function ChatInterface({ onQuerySubmit, loading, isGuest = false, steeringMode = 'balanced', setSteeringMode }) {
     const [input, setInput] = useState('');
     const [focused, setFocused] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [currentSuggestions, setCurrentSuggestions] = useState(ALL_SUGGESTIONS.slice(0, 3));
+    const [tickerIndex, setTickerIndex] = useState(0);
     const inputRef = useRef(null);
     const magneticBtn = useMagneticButton(0.24);
+
+    // Dynamic scanning ticker rotating every 1.4 seconds when loading
+    useEffect(() => {
+        if (!loading) {
+            setTickerIndex(0);
+            return;
+        }
+        const interval = setInterval(() => {
+            setTickerIndex((prev) => (prev + 1) % SCAN_TICKER_MESSAGES.length);
+        }, 1400);
+        return () => clearInterval(interval);
+    }, [loading]);
 
     // Keyboard shortcut to focus search input: Ctrl/Cmd + /
     useEffect(() => {
@@ -625,6 +645,9 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                 />
 
                 <div className="relative overflow-hidden rounded-2xl bg-[#121215] border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14),0_20px_40px_-15px_rgba(0,0,0,0.8)]">
+                    {loading && (
+                        <div className="laser-scan-line pointer-events-none absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#E5C878] to-transparent shadow-[0_0_12px_#E5C878]" />
+                    )}
                     <form onSubmit={handleSubmit} className="flex items-center gap-3 px-5 py-3.5 sm:px-6 sm:py-4">
                         <Search className="h-5 w-5 shrink-0 text-[#E6C762]" strokeWidth={1.75} />
                         <input
@@ -705,6 +728,14 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                         </div>
                     </div>
                 </div>
+
+                {/* Animated Dynamic Scanning Ticker */}
+                {loading && (
+                    <div className="mt-3 flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-[#E6C762]/[0.06] border border-[#E6C762]/20 text-xs font-mono text-[#E5C878] animate-pulse">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#E5C878] animate-ping" />
+                        <span className="tracking-wide">{SCAN_TICKER_MESSAGES[tickerIndex]}</span>
+                    </div>
+                )}
             </div>
 
             {/* 2. UPGRADED DEPARTMENT CARDS WITH ATTRACTIVE PRICING CUES & ICONS */}

@@ -1389,39 +1389,17 @@ export default function UserDashboard() {
                                     </div>
 
                                     <div className="relative">
-                                        <svg
-                                            aria-hidden="true"
-                                            className="pointer-events-none absolute inset-x-0 top-8 hidden h-24 w-full lg:block"
-                                            preserveAspectRatio="none"
-                                            viewBox="0 0 1200 100"
-                                        >
-                                            <defs>
-                                                <linearGradient id="edge-grad" x1="0" x2="1" y1="0" y2="0">
-                                                    <stop offset="0" stopColor="#E6C762" stopOpacity="0.4" />
-                                                    <stop offset="0.5" stopColor="#38BDF8" stopOpacity="0.7" />
-                                                    <stop offset="1" stopColor="#34D399" stopOpacity="0.4" />
-                                                </linearGradient>
-                                            </defs>
+                                        <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
                                             <path
-                                                d="M 60 50 C 220 10, 380 90, 540 50 S 860 10, 1020 50 S 1140 90, 1180 50"
+                                                d="M 20 50 H 980"
+                                                stroke={loading ? "rgba(229, 200, 120, 0.75)" : "rgba(229, 200, 120, 0.25)"}
+                                                strokeWidth="2"
+                                                strokeDasharray="6 6"
+                                                className={`edge-flow ${loading ? 'edge-flow-active animate-pulse' : ''}`}
                                                 fill="none"
-                                                stroke="url(#edge-grad)"
-                                                strokeWidth={loading ? "1.5" : "1"}
-                                                className={loading ? 'edge-flow-active' : ''}
-                                                opacity={loading ? "0.85" : "0.35"}
                                             />
-                                            {loading && (
-                                                <path
-                                                    d="M 60 50 C 220 90, 380 10, 540 50 S 860 90, 1020 50 S 1140 10, 1180 50"
-                                                    fill="none"
-                                                    stroke="rgba(230, 199, 98, 0.35)"
-                                                    strokeWidth="1"
-                                                    strokeDasharray="4 8"
-                                                    className="edge-flow-active"
-                                                />
-                                            )}
                                         </svg>
-                                        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+                                        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 relative z-10">
                                             {AGENT_LIST.map((agent) => {
                                                 const state = agentStatusMap[agent.id] || AGENT_STATES.IDLE;
                                                 const metrics = agentMetricsMap[agent.id];
