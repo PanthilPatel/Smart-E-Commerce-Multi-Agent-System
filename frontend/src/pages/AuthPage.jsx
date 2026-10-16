@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import NumberCounter from '../components/NumberCounter';
+import LoginTransitionOverlay from '../components/LoginTransitionOverlay';
 
 export default function AuthPage({ defaultIsLogin = true }) {
     const [isLogin, setIsLogin] = useState(defaultIsLogin);
@@ -28,6 +29,8 @@ export default function AuthPage({ defaultIsLogin = true }) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [activeSpreadTab, setActiveSpreadTab] = useState('live');
+    const [showTransition, setShowTransition] = useState(false);
+    const [transitionUserName, setTransitionUserName] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -89,7 +92,8 @@ export default function AuthPage({ defaultIsLogin = true }) {
                     email: data.user.email,
                     isLoggedIn: true
                 }));
-                navigate('/dashboard');
+                setTransitionUserName(profileName);
+                setShowTransition(true);
             } else {
                 const { data, error: authError } = await supabase.auth.signUp({
                     email: formData.email,
@@ -110,7 +114,8 @@ export default function AuthPage({ defaultIsLogin = true }) {
                         email: data.user.email,
                         isLoggedIn: true
                     }));
-                    navigate('/dashboard');
+                    setTransitionUserName(profileName);
+                    setShowTransition(true);
                 } else {
                     setError("Sign up complete! Please check your email to confirm registration.");
                 }
@@ -151,7 +156,8 @@ export default function AuthPage({ defaultIsLogin = true }) {
             tier: 'Free',
             credits: 0
         }));
-        navigate('/dashboard', { replace: true });
+        setTransitionUserName('Guest Explorer');
+        setShowTransition(true);
     };
 
     return (
@@ -593,6 +599,13 @@ export default function AuthPage({ defaultIsLogin = true }) {
                 </div>
 
             </div>
+
+            {showTransition && (
+                <LoginTransitionOverlay 
+                    userName={transitionUserName} 
+                    onComplete={() => navigate('/dashboard')} 
+                />
+            )}
         </div>
     );
 }

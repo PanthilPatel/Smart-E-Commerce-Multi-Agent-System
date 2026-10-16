@@ -1331,7 +1331,7 @@ export default function UserDashboard() {
                     </div>
                 </header>
 
-                <main className="flex-grow overflow-y-auto px-8 py-8 space-y-12 animate-spring-up text-left">
+                <main className="flex-grow overflow-y-auto px-8 py-8 space-y-12 animate-fade-in animate-spring-up text-left">
 
                     {activeTab === 'discover' && (
                         <>
