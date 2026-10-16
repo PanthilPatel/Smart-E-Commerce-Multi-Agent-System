@@ -1,10 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Sparkles, Cpu } from 'lucide-react';
+import { ShieldCheck, Sparkles, Cpu, Lock, CheckCircle2 } from 'lucide-react';
 
 const STEPS = [
-    { text: "Verifying encrypted credentials & session tokens...", icon: ShieldCheck },
-    { text: "Connecting to SEAMAS 7-Agent Neural Mesh...", icon: Cpu },
-    { text: "Access granted. Launching private client workspace...", icon: Sparkles }
+    {
+        code: '01 / AUTHENTICATION',
+        title: 'Cryptographic Session Verified',
+        sub: 'Establishing TLS 1.3 private client tunnel & RLS token...',
+        progress: 35,
+        icon: ShieldCheck,
+    },
+    {
+        code: '02 / NEURAL MESH',
+        title: 'Synchronizing 7-Agent Swarm',
+        sub: 'Arming Orchestrator, Live DOM Scraper & Sentiment nodes...',
+        progress: 75,
+        icon: Cpu,
+    },
+    {
+        code: '03 / CLEARANCE GRANTED',
+        title: 'Executive Workspace Ready',
+        sub: 'Launching real-time Indian marketplace arbitrage index...',
+        progress: 100,
+        icon: Sparkles,
+    },
 ];
 
 export default function LoginTransitionOverlay({ userName, onComplete }) {
@@ -12,15 +30,14 @@ export default function LoginTransitionOverlay({ userName, onComplete }) {
     const [isExiting, setIsExiting] = useState(false);
 
     useEffect(() => {
-        // Step progression over 1.2 seconds total
-        const t1 = setTimeout(() => setStepIdx(1), 380);
-        const t2 = setTimeout(() => setStepIdx(2), 760);
+        const t1 = setTimeout(() => setStepIdx(1), 420);
+        const t2 = setTimeout(() => setStepIdx(2), 840);
         const t3 = setTimeout(() => {
             setIsExiting(true);
             setTimeout(() => {
                 if (onComplete) onComplete();
-            }, 300);
-        }, 1100);
+            }, 320);
+        }, 1250);
 
         return () => {
             clearTimeout(t1);
@@ -29,61 +46,120 @@ export default function LoginTransitionOverlay({ userName, onComplete }) {
         };
     }, [onComplete]);
 
-    const CurrentIcon = STEPS[stepIdx].icon;
+    const current = STEPS[stepIdx];
+    const CurrentIcon = current.icon;
 
     return (
-        <div 
-            className={`fixed inset-0 z-50 flex items-center justify-center bg-[#09090B] transition-opacity duration-300 ${
+        <div
+            className={`fixed inset-0 z-[9999] grid place-items-center bg-[#09090B] px-4 transition-opacity duration-300 ${
                 isExiting ? 'opacity-0 pointer-events-none' : 'opacity-100'
             }`}
         >
-            {/* Ambient Radial Spotlight */}
-            <div 
-                className="absolute inset-0 pointer-events-none"
+            {/* Dead-Center Radial Champagne Spotlight */}
+            <div
+                className="pointer-events-none absolute inset-0"
                 style={{
-                    background: 'radial-gradient(circle 500px at 50% 50%, rgba(229, 200, 120, 0.12), transparent 70%)'
+                    background:
+                        'radial-gradient(circle 560px at 50% 50%, rgba(229, 200, 120, 0.14), rgba(229, 200, 120, 0.03) 45%, transparent 75%)',
                 }}
             />
 
-            {/* Central Animated Capsule */}
-            <div className="relative z-10 flex flex-col items-center text-center max-w-sm px-6 animate-scale-in">
-                {/* Glowing Monogram Orb */}
-                <div className="relative mb-6">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-b from-[#1E1E24] to-[#121215] border border-[#E5C878]/40 flex items-center justify-center shadow-[0_0_35px_rgba(229,200,120,0.3)]">
-                        <CurrentIcon className="w-7 h-7 text-[#F5E6B3] animate-pulse"/>
-                    </div>
-                    {/* Concentric Ping Ripple */}
-                    <span className="absolute inset-0 rounded-2xl border border-[#E5C878]/60 animate-ping opacity-40 pointer-events-none" />
-                </div>
+            {/* Subtle Architectural Grid */}
+            <div className="seamas-grid pointer-events-none absolute inset-0 opacity-40" />
 
-                {/* Status Telemetry */}
-                <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#E5C878] mb-1.5">
-                    Security Handshake
-                </span>
-                <h3 className="font-display text-lg font-medium text-white mb-3">
-                    Welcome, {userName || 'Client'}
-                </h3>
+            {/* Dead-Center Luxury Glass Vault Card */}
+            <div className="relative z-10 w-full max-w-md mx-auto rounded-3xl border border-[#E5C878]/25 bg-[#121215]/90 p-8 text-center backdrop-blur-2xl shadow-[0_24px_80px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.15)] animate-spring-up">
+                {/* Top Gold Specular Line */}
+                <div className="absolute inset-x-10 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#E5C878]/70 to-transparent" />
 
-                {/* Progress Pipeline Dots */}
-                <div className="flex items-center gap-1.5 mb-4">
-                    {STEPS.map((_, i) => (
-                        <div 
-                            key={i}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                                i === stepIdx 
-                                    ? 'w-8 bg-gradient-to-r from-[#E5C878] to-[#C9A449]' 
-                                    : i < stepIdx 
-                                    ? 'w-2 bg-[#34D399]' 
-                                    : 'w-2 bg-white/10'
-                            }`}
+                {/* Orbital Ring + Central Vault Emblem */}
+                <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
+                    {/* Rotating Outer Dashed Gold Ring */}
+                    <svg className="absolute inset-0 h-full w-full animate-spin" style={{ animationDuration: '8s' }} viewBox="0 0 100 100">
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="46"
+                            fill="none"
+                            stroke="rgba(229, 200, 120, 0.35)"
+                            strokeWidth="1.5"
+                            strokeDasharray="6 6"
                         />
-                    ))}
+                    </svg>
+
+                    {/* Progress Ring */}
+                    <svg className="absolute inset-1.5 h-[88px] w-[88px] -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="42"
+                            fill="none"
+                            stroke="#E5C878"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeDasharray="264"
+                            strokeDashoffset={264 - (264 * current.progress) / 100}
+                            className="transition-all duration-500 ease-out"
+                        />
+                    </svg>
+
+                    {/* Inner Glowing Core */}
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-[#E5C878]/40 bg-gradient-to-b from-[#1F1F26] to-[#121215] shadow-[0_0_30px_rgba(229,200,120,0.3)]">
+                        <CurrentIcon className="h-6 w-6 text-[#F5E6B3]"/>
+                    </div>
                 </div>
 
-                {/* Animated Status Text */}
-                <p className="font-mono text-xs text-neutral-400 min-h-[20px] transition-all">
-                    {STEPS[stepIdx].text}
+                {/* Eyebrow Badge */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#E5C878]/30 bg-[#E5C878]/10 px-3 py-1 mb-3">
+                    <Lock className="h-3 w-3 text-[#E5C878]"/>
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#F5E6B3]">
+                        {current.code}
+                    </span>
+                </div>
+
+                {/* Personalized Welcome Headline */}
+                <h2 className="font-display text-2xl font-bold tracking-tight text-white">
+                    Welcome, <span className="text-[#F5E6B3]">{userName || 'Client'}</span>
+                </h2>
+
+                {/* Active Step Title */}
+                <p className="mt-1.5 text-sm font-medium text-zinc-200 transition-all">
+                    {current.title}
                 </p>
+
+                {/* Smooth Progress Bar */}
+                <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06] p-0.5">
+                    <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#C9A449] via-[#E5C878] to-[#F5E6B3] shadow-[0_0_12px_rgba(229,200,120,0.6)] transition-all duration-500 ease-out"
+                        style={{ width: `${current.progress}%` }}
+                    />
+                </div>
+
+                {/* 7-Agent Node Mini-Indicators */}
+                <div className="mt-4 flex items-center justify-center gap-2">
+                    {['ORCH', 'SRCH', 'PRCE', 'REVW', 'BDGT', 'RECM', 'FINL'].map((node, i) => {
+                        const active = stepIdx >= 1 || i <= stepIdx * 3;
+                        return (
+                            <span
+                                key={node}
+                                className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold transition-all duration-300 ${
+                                    active
+                                        ? 'border border-[#34D399]/40 bg-[#34D399]/10 text-[#34D399]'
+                                        : 'border border-white/5 bg-white/[0.02] text-zinc-600'
+                                }`}
+                            >
+                                {node}
+                            </span>
+                        );
+                    })}
+                </div>
+
+                {/* Sub-telemetry */}
+                <div className="mt-4 flex items-center justify-center gap-1.5 font-mono text-[11px] text-zinc-400">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#34D399] shrink-0"/>
+                    <span className="truncate">{current.sub}</span>
+                </div>
             </div>
         </div>
     );
