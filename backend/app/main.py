@@ -5,6 +5,15 @@ import logging
 import os
 import re
 import sys
+
+try:
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
+
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
@@ -39,14 +48,25 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="SEAMAS Multi-Agent Backend", version="1.0.0", lifespan=lifespan)
 allowed_origins = [origin.strip() for origin in settings.ALLOWED_ORIGINS.split(",") if origin.strip()]
-if not allowed_origins and settings.ENVIRONMENT.lower() != "production":
-    allowed_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if settings.ENVIRONMENT.lower() != "production":
+    dev_origins = [
+        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:5174", "http://127.0.0.1:5174",
+        "http://localhost:5175", "http://127.0.0.1:5175",
+        "http://localhost:5176", "http://127.0.0.1:5176",
+        "http://localhost:3000", "http://127.0.0.1:3000",
+    ]
+    for o in dev_origins:
+        if o not in allowed_origins:
+            allowed_origins.append(o)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=allowed_origins if allowed_origins else ["*"],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?$" if settings.ENVIRONMENT.lower() != "production" else None,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -79,17 +99,28 @@ async def enforce_rate_limit(scope: str, identity: str, limit: int, window_secon
                             headers={"Retry-After": str(max(1, retry_after))})
 
 
+GUEST_USER_ID = "00000000-0000-0000-0000-000000000000"
+GUEST_USER = {
+    "id": GUEST_USER_ID,
+    "email": "guest@seamas.ai",
+    "user_metadata": {"full_name": "Guest Explorer"},
+    "role": "authenticated",
+}
+
+
 async def current_user(request: Request, authorization: str | None = Header(default=None)) -> dict:
     """Validate the bearer token with Supabase Auth; never accept an ID from JSON."""
     ip = request.client.host if request.client else "unknown"
     await enforce_rate_limit("auth-ip", ip, 60, 60)
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=401, detail="Sign in to continue.")
-    if not settings.SUPABASE_URL or not settings.SUPABASE_ANON_KEY:
-        raise HTTPException(status_code=503, detail="Authentication service is not configured.")
     token = authorization.split(" ", 1)[1].strip()
     if not token:
         raise HTTPException(status_code=401, detail="Invalid authentication token.")
+    if token in ("guest-preview-token", "guest-explorer-uuid") or (settings.ENVIRONMENT.lower() != "production" and token.startswith("guest-")):
+        return GUEST_USER
+    if not settings.SUPABASE_URL or not settings.SUPABASE_ANON_KEY:
+        raise HTTPException(status_code=503, detail="Authentication service is not configured.")
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.get(
@@ -139,6 +170,8 @@ def search_cost(mode: str) -> int:
 def charge_search_credits(user: dict, amount: int) -> None:
     """Charge the authenticated identity atomically and keep failures distinct."""
     user_id = str(user["id"])
+    if user_id == GUEST_USER_ID:
+        return
     try:
         charged = deduct_credit(user_id, amount)
     except CreditServiceUnavailable:
@@ -228,10 +261,11 @@ async def chat_endpoint(payload: ChatRequest, user: dict = Depends(current_user)
     except Exception:
         # Guarantee single refund on pipeline failure
         logger.exception("Chat pipeline failed request_id=%s; issuing single refund", getattr(user, "request_id", "unknown"))
-        try:
-            refund_credit(user_id, cost, reference_id=charge_ref)
-        except Exception as ref_err:
-            logger.error("Failed to refund credits user_id=%s ref=%s: %s", user_id, charge_ref, ref_err)
+        if user_id != GUEST_USER_ID:
+            try:
+                refund_credit(user_id, cost, reference_id=charge_ref)
+            except Exception as ref_err:
+                logger.error("Failed to refund credits user_id=%s ref=%s: %s", user_id, charge_ref, ref_err)
         raise HTTPException(status_code=502, detail="Product search failed. Please try again.")
 
 
@@ -296,7 +330,7 @@ async def chat_stream_endpoint(payload: ChatRequest, request: Request, user: dic
             logger.exception("Stream pipeline failed")
             yield f"data: {json.dumps({'type': 'error', 'message': 'Product search failed. Please try again.'})}\n\n"
         finally:
-            if not pipeline_succeeded:
+            if not pipeline_succeeded and user_id != GUEST_USER_ID:
                 # Refund exactly once with idempotency key
                 try:
                     refund_credit(user_id, cost, reference_id=charge_ref)
@@ -408,11 +442,14 @@ async def status_endpoint(request: Request):
 
 @app.get("/api/credits/me")
 async def fetch_my_credits(user: dict = Depends(current_user)):
-    await enforce_rate_limit("credits", str(user["id"]), 60, 60)
+    user_id = str(user["id"])
+    if user_id == GUEST_USER_ID:
+        return {"tier": "free", "credits": 100, "renew_at": None}
+    await enforce_rate_limit("credits", user_id, 60, 60)
     try:
-        return get_credits(user["id"])
+        return get_credits(user_id)
     except CreditServiceUnavailable:
-        logger.exception("Credit balance service unavailable user_ref=%s", str(user["id"])[:8])
+        logger.exception("Credit balance service unavailable user_ref=%s", user_id[:8])
         raise HTTPException(status_code=503, detail="Credits could not be loaded. Please try again.")
 
 

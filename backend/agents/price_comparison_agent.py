@@ -469,6 +469,19 @@ async def scrape_live_price(url: str) -> Dict[str, Any]:
                         res_data["price"] = pval
                         break
 
+    # Priority 2.8: Modern E-Commerce / Shopify / WooCommerce PDP Selectors
+    if not res_data["price"]:
+        ecom_sel = soup.select_one(".price-item--sale, .price-item--regular, .product__price, span.money, .product-price, .special-price, .current-price, .offer-price")
+        if ecom_sel:
+            clean_txt = re.sub(r"[^\d]", "", ecom_sel.get_text())
+            if clean_txt:
+                try:
+                    pval = int(clean_txt)
+                    if 50 <= pval <= 5000000:
+                        res_data["price"] = pval
+                except Exception:
+                    pass
+
     # Priority 3: Strictly Guarded PDP Container Fallback (No generic body text regex counter)
     if not res_data["price"]:
         price_containers = soup.select("[class*='price'], [id*='price'], [class*='pdp'], [id*='pdp']")
@@ -664,7 +677,8 @@ def is_specific_product_page(url: str) -> bool:
         "gonoise.com", "fireboltt.com", "titan.co.in", "fastrack.in", "fossil.com", "casioindiashop.com",
         "timexindia.com", "helioswatchstore.com", "garmin.co.in", "amazfit.co.in", "ajio.com", "bewakoof.com",
         "zepto.com", "zeptonow.com", "blinkit.com", "bigbasket.com", "swissbeauty.in", "purplle.com",
-        "tirabeauty.com", "mamaearth.in", "sugarcosmetics.com", "myglamm.com"
+        "tirabeauty.com", "mamaearth.in", "sugarcosmetics.com", "myglamm.com",
+        "unboxify.in", "headphonezone.in", "boomdeal.in", "computechstore.in", "openboxwale.in", "theclickstore.in"
     ]
     is_known_store = any(kd in domain for kd in known_domains)
 
@@ -1379,13 +1393,7 @@ Records:
                     r["price_verification_method"] = "store_index"
                     r["status"] = "Target Match" if not budget or snippet_price <= budget else "Out of Budget"
                     r["tags"] = ["Store Listing", "Indexed Offer"]
-                else:
-                    r["price"] = None
-                    r["indexed_price"] = None
-                    r["original_price"] = None
-                    r["status"] = "Price unavailable"
-                    r["tags"] = ["Search Index", "Price Pending"]
-                verified_results.append(r)
+                    verified_results.append(r)
 
         results = verified_results
 

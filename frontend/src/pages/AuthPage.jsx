@@ -72,6 +72,36 @@ export default function AuthPage({ defaultIsLogin = true }) {
         navigate(loginMode ? '/login' : '/signup', { replace: true });
     };
 
+    // Helper: wraps a Supabase auth call in a timeout so a paused/offline
+    // project never leaves the button in a permanent loading state.
+    const withAuthTimeout = (promise, timeoutMs = 10000) => {
+        const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('AUTH_TIMEOUT')), timeoutMs)
+        );
+        return Promise.race([promise, timeout]);
+    };
+
+    const friendlyAuthError = (err) => {
+        const msg = err?.message || '';
+        if (msg === 'AUTH_TIMEOUT' || msg.toLowerCase().includes('failed to fetch') ||
+            msg.toLowerCase().includes('load failed') || msg.toLowerCase().includes('network')) {
+            return 'Authentication service is unreachable right now. Please use ⚡ Instant Guest Preview to explore the app, or try again later.';
+        }
+        if (msg.toLowerCase().includes('invalid login credentials') || msg.toLowerCase().includes('invalid email or password')) {
+            return 'Incorrect email or password. Please check your credentials and try again.';
+        }
+        if (msg.toLowerCase().includes('email not confirmed')) {
+            return 'Please confirm your email address before signing in. Check your inbox for a verification link.';
+        }
+        if (msg.toLowerCase().includes('user already registered')) {
+            return 'An account with this email already exists. Switch to Sign In to continue.';
+        }
+        if (msg.toLowerCase().includes('password should be')) {
+            return 'Password must be at least 6 characters long.';
+        }
+        return msg || 'Authentication failed. Please verify your credentials and try again.';
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -79,10 +109,12 @@ export default function AuthPage({ defaultIsLogin = true }) {
 
         try {
             if (isLogin) {
-                const { data, error: authError } = await supabase.auth.signInWithPassword({
-                    email: formData.email,
-                    password: formData.password
-                });
+                const { data, error: authError } = await withAuthTimeout(
+                    supabase.auth.signInWithPassword({
+                        email: formData.email,
+                        password: formData.password
+                    })
+                );
                 if (authError) throw authError;
 
                 const profileName = data.user.user_metadata?.full_name || data.user.email.split('@')[0];
@@ -95,15 +127,17 @@ export default function AuthPage({ defaultIsLogin = true }) {
                 setTransitionUserName(profileName);
                 setShowTransition(true);
             } else {
-                const { data, error: authError } = await supabase.auth.signUp({
-                    email: formData.email,
-                    password: formData.password,
-                    options: {
-                        data: {
-                            full_name: formData.name || formData.email.split('@')[0]
+                const { data, error: authError } = await withAuthTimeout(
+                    supabase.auth.signUp({
+                        email: formData.email,
+                        password: formData.password,
+                        options: {
+                            data: {
+                                full_name: formData.name || formData.email.split('@')[0]
+                            }
                         }
-                    }
-                });
+                    })
+                );
                 if (authError) throw authError;
 
                 if (data?.user) {
@@ -122,29 +156,33 @@ export default function AuthPage({ defaultIsLogin = true }) {
             }
         } catch (err) {
             console.error('Authentication error:', err);
-            setError(err.message || "Authentication failed. Please verify your credentials.");
+            setError(friendlyAuthError(err));
         } finally {
             setLoading(false);
         }
     };
 
+
     const handleOAuthSignIn = async (provider) => {
         try {
             setLoading(true);
             setError(null);
-            const { error: authError } = await supabase.auth.signInWithOAuth({
-                provider: provider,
-                options: {
-                    redirectTo: window.location.origin + '/dashboard'
-                }
-            });
+            const { error: authError } = await withAuthTimeout(
+                supabase.auth.signInWithOAuth({
+                    provider: provider,
+                    options: {
+                        redirectTo: window.location.origin + '/dashboard'
+                    }
+                })
+            );
             if (authError) throw authError;
         } catch (err) {
             console.error(`${provider} sign in error:`, err);
-            setError(err.message || `Failed to sign in with ${provider}.`);
+            setError(friendlyAuthError(err));
             setLoading(false);
         }
     };
+
 
     const handleDemoLogin = () => {
         localStorage.setItem('seamas_user_session', JSON.stringify({

@@ -13,18 +13,23 @@ export default function AiVerdictBanner({ items = [], query = '' }) {
 
     if (!items || items.length === 0) return null;
 
-    // Find top match (highest rating or first verified item)
-    const topPick = items.find(i => i.is_verified) || items[0];
+    // Only consider items with a verified positive numerical price
+    const pricedItems = items.filter(i => {
+        const p = Number(i.extracted_price || i.price || 0);
+        return Number.isFinite(p) && p > 0;
+    });
+
+    // Find top match (highest rating or first verified item among priced items)
+    const topPick = pricedItems.find(i => i.is_verified) || pricedItems[0] || null;
 
     // Find best budget pick (lowest price among valid items)
-    const pricedItems = items.filter(i => Number(i.extracted_price || i.price || 0) > 0);
     const budgetPick = pricedItems.length > 0
         ? [...pricedItems].sort((a, b) => {
             const pA = Number(a.extracted_price || a.price || 0);
             const pB = Number(b.extracted_price || b.price || 0);
             return pA - pB;
         })[0]
-        : items[0];
+        : null;
 
     const topPrice = topPick ? Number(topPick.extracted_price || topPick.price || 0) : 0;
     const budgetPrice = budgetPick ? Number(budgetPick.extracted_price || budgetPick.price || 0) : 0;

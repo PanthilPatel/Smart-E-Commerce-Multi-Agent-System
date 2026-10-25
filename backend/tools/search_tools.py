@@ -1,9 +1,18 @@
 import os
 import re
+import sys
 import httpx
 from urllib.parse import urlparse
 from typing import List, Dict, Any
 from dotenv import load_dotenv
+
+try:
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
 
 load_dotenv()
 
@@ -257,7 +266,9 @@ async def _query_tavily(effective_query: str, max_results: int, page: int, tavil
         return []
     try:
         print(f"[SearchTool] Querying Tavily API for page {page} (query: '{effective_query}')...")
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(connect=5.0, read=20.0, write=5.0, pool=5.0)
+        ) as client:
             response = await client.post(
                 "https://api.tavily.com/search",
                 json={
@@ -286,7 +297,7 @@ async def _query_tavily(effective_query: str, max_results: int, page: int, tavil
                         continue
                     seen_urls.add(url)
                     store_label = _domain_to_store(url)
-                    
+
                     thumbnail = r.get("thumbnail") or r.get("image") or r.get("img_src")
                     if not thumbnail and idx < len(images):
                         thumbnail = images[idx]
@@ -307,6 +318,10 @@ async def _query_tavily(effective_query: str, max_results: int, page: int, tavil
                 return records
             else:
                 print(f"[SearchTool] Tavily HTTP {response.status_code}: {response.text[:200]}")
+    except (httpx.ReadError, httpx.RemoteProtocolError, httpx.ConnectError,
+            httpx.TimeoutException, httpx.TransportError) as e:
+        # Catches Windows wsarecv TCP-abort or mid-stream connection reset from Tavily.
+        print(f"[SearchTool] Tavily transport error for page {page}: {type(e).__name__}: {e}")
     except Exception as e:
         print(f"[SearchTool] Tavily error for page {page}: {repr(e)}")
     return []
@@ -324,7 +339,8 @@ async def web_search_tool(
     BACKUP: Tavily API (triggered ONLY if SearXNG fails, times out, or returns contaminated/zero results).
     Uses up to 2 retry attempts before falling back to Tavily.
     """
-    effective_query = _build_shopping_query(query) if augment_query else query
+    raw_query = _build_shopping_query(query) if augment_query else query
+    effective_query = raw_query.replace("₹", "Rs. ")
     tavily_key = os.getenv("TAVILY_API_KEY", "")
     searxng_url = os.getenv("SEARXNG_BASE_URL", "https://seamas-searxng.onrender.com").rstrip("/")
     searxng_timeout = float(os.getenv("SEARXNG_TIMEOUT", "8.0"))
@@ -336,7 +352,15 @@ async def web_search_tool(
                 records = []
                 seen_urls = set()
 
-                async with httpx.AsyncClient(timeout=searxng_timeout) as client:
+                # Use split timeouts: short connect, longer read to tolerate slow CDN bodies
+                # without hanging forever if the TCP connection drops mid-stream.
+                _timeout = httpx.Timeout(
+                    connect=5.0,
+                    read=searxng_timeout,
+                    write=5.0,
+                    pool=5.0,
+                )
+                async with httpx.AsyncClient(timeout=_timeout) as client:
                     print(f"[SearchTool] [PRIMARY] Querying SearXNG page {page} (attempt {attempt+1}, timeout={searxng_timeout}s): {searxng_url} (query: '{effective_query}')")
                     response = await client.get(
                         f"{searxng_url}/search",
@@ -403,11 +427,19 @@ async def web_search_tool(
                     print(f"[SearchTool] SearXNG page {page} returned HTTP {response.status_code}. Switching to Tavily backup...")
                     break  # No retry for explicit HTTP errors
 
+            except (httpx.ReadError, httpx.RemoteProtocolError, httpx.ConnectError,
+                    httpx.TimeoutException, httpx.TransportError) as e:
+                # Covers Windows wsarecv TCP-abort, mid-stream connection resets,
+                # and any other transport-level failure from SearXNG / CDN.
+                if attempt == 0:
+                    print(f"[SearchTool] SearXNG page {page} transport error ({type(e).__name__}: {e}). Retrying...")
+                else:
+                    print(f"[SearchTool] SearXNG page {page} transport error after retry ({type(e).__name__}: {e}). Switching to Tavily backup...")
             except Exception as e:
                 if attempt == 0:
-                    print(f"[SearchTool] SearXNG page {page} error ({e}). Retrying...")
+                    print(f"[SearchTool] SearXNG page {page} unexpected error ({e}). Retrying...")
                 else:
-                    print(f"[SearchTool] SearXNG page {page} error after retry ({e}). Switching to Tavily backup...")
+                    print(f"[SearchTool] SearXNG page {page} unexpected error after retry ({e}). Switching to Tavily backup...")
 
     # ── 2. BACKUP SEARCH: Tavily ─────────────────────────────────────────────
     if tavily_key:

@@ -106,8 +106,18 @@ export default function App() {
                 }));
             }
         };
-        supabase.auth.getSession()
-            .then(({ data: { session } }) => syncSession(session))
+        const SESSION_TIMEOUT_MS = 4000;
+        const sessionTimeout = new Promise((resolve) =>
+            setTimeout(() => resolve({ data: { session: null }, timedOut: true }), SESSION_TIMEOUT_MS)
+        );
+        Promise.race([supabase.auth.getSession(), sessionTimeout])
+            .then((result) => {
+                if (result?.timedOut) {
+                    console.warn('Supabase getSession timed out — proceeding as unauthenticated.');
+                    return;
+                }
+                syncSession(result?.data?.session ?? null);
+            })
             .catch((error) => console.error('Session restore failed:', error))
             .finally(() => setIsAuthLoading(false));
 

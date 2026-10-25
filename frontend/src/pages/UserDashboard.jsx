@@ -1212,7 +1212,8 @@ export default function UserDashboard() {
                 ? Number(item.extracted_price)
                 : (item.price != null ? Number(item.price) : (item.indexed_price != null ? Number(item.indexed_price) : null));
             const hasValidPrice = Number.isFinite(effectivePrice) && effectivePrice > 0;
-            if (hasValidPrice && effectivePrice > priceRange) return false;
+            if (!hasValidPrice) return false;
+            if (effectivePrice > priceRange) return false;
             if (selectedMarketplaces.length > 0) {
                 const itemStores = (item.marketplace || '').split(',').map(s => s.trim().toLowerCase());
                 const match = selectedMarketplaces.some(sel => {
@@ -1222,7 +1223,10 @@ export default function UserDashboard() {
                 if (!match) return false;
             }
             if (verifiedOnly && !hasValidPrice) return false;
-            if (inBudgetOnly && item.status !== 'Target Match') return false;
+            if (inBudgetOnly) {
+                if (item.status === 'Out of Budget') return false;
+                if (hasValidPrice && effectivePrice > priceRange) return false;
+            }
             return true;
         });
     }, [priceData, selectedMarketplaces, priceRange, verifiedOnly, inBudgetOnly]);
@@ -1831,36 +1835,6 @@ export default function UserDashboard() {
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* AI Agent Steering Model Card */}
-                            <div className="bg-[#121215] p-6 rounded-2xl border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] space-y-4">
-                                <h3 className="font-display font-semibold text-sm text-white flex items-center gap-2">
-                                    <Brain className="h-4 w-4 text-[#E6C762]" />
-                                    AI Agent Steering Model
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    {[
-                                        { id: 'balanced', label: 'Balanced Matrix', desc: 'Optimal speed & depth' },
-                                        { id: 'speed', label: 'Speed Swarm', desc: 'Faster scans, lower cost' },
-                                        { id: 'accuracy', label: 'Deep Audit', desc: 'Full trust verification' }
-                                    ].map((mode) => (
-                                        <button
-                                            key={mode.id}
-                                            onClick={() => {
-                                                setSteeringMode(mode.id);
-                                                updatePreference('defaultSteering', mode.id);
-                                            }}
-                                            className={`p-3.5 rounded-xl border text-left transition-all ${steeringMode === mode.id
-                                                    ? 'border-[#E6C762]/50 bg-[#E6C762]/[0.05] text-white shadow-sm'
-                                                    : 'border-white/5 bg-white/[0.02] hover:bg-white/[0.04] text-zinc-400'
-                                                }`}
-                                        >
-                                            <div className="text-xs font-semibold">{mode.label}</div>
-                                            <div className="text-[11px] text-zinc-500 mt-1">{mode.desc}</div>
-                                        </button>
-                                    ))}
                                 </div>
                             </div>
 

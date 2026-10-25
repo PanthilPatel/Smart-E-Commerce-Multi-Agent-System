@@ -968,7 +968,13 @@ export default function ProductGrid({ items = [], query = '', ready = true, onCa
 
     const validShoppingItems = useMemo(() => {
         if (!Array.isArray(items)) return [];
-        return items.filter(item => !isNonStoreOrArticleItem(item));
+        return items.filter(item => {
+            if (isNonStoreOrArticleItem(item)) return false;
+            const p = item.extracted_price != null
+                ? Number(item.extracted_price)
+                : (item.price != null ? Number(item.price) : (item.indexed_price != null ? Number(item.indexed_price) : null));
+            return Number.isFinite(p) && p > 0;
+        });
     }, [items]);
 
     useEffect(() => {

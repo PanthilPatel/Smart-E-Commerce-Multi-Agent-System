@@ -148,16 +148,21 @@ async def search_agent(state: Dict[str, Any]) -> Dict[str, Any]:
     if raw_shopping_results:
         page_logs.append(f"Pre-supplied search results loaded ({len(raw_shopping_results)} records).")
     else:
-        clean_q_words = [w for w in re.findall(r"\b\w+\b", query) if w.lower() not in {"under", "best", "for", "with", "and", "the", "in", "a", "of", "to", "price", "buy", "online"}]
-        core_terms = " ".join(clean_q_words[:4]) if len(clean_q_words) > 4 else query
+        # Clean query without budget phrases for direct product search
+        budget_clean_q = re.sub(r"\b(under|below|less than|within|around)\s*(?:rs\.?|inr|₹)?\s*\d+\b", "", query, flags=re.IGNORECASE)
+        budget_clean_q = re.sub(r"\s+", " ", budget_clean_q).strip()
+        search_target = budget_clean_q if len(budget_clean_q) >= 3 else query
+
+        clean_q_words = [w for w in re.findall(r"\b\w+\b", search_target) if w.lower() not in {"under", "best", "for", "with", "and", "the", "in", "a", "of", "to", "price", "buy", "online"}]
+        core_terms = " ".join(clean_q_words[:5]) if clean_q_words else search_target
 
         # Prepare concurrent fetch tasks across pages 1 to max_search_pages
         shopping_tasks = []
         for current_page in range(1, max_search_pages + 1):
             qualifier = store_coverage_qualifiers[(current_page - 1) % len(store_coverage_qualifiers)]
-            q_to_use = core_terms if current_page >= 3 and core_terms != query else query
+            q_to_use = core_terms if current_page >= 2 and core_terms else search_target
             q_lower = q_to_use.lower()
-            if any(cw in q_lower for cw in ["buy", "price", "flipkart", "amazon"]):
+            if any(cw in q_lower for cw in ["flipkart", "amazon", "croma"]):
                 shop_q = q_to_use
             else:
                 shop_q = f"{q_to_use} {qualifier}".strip() if qualifier else q_to_use
@@ -246,8 +251,8 @@ async def search_agent(state: Dict[str, Any]) -> Dict[str, Any]:
             count_non_product += 1
             continue
 
-        # Validation: Exclude foreign non-Indian storefronts (e.g., Tashkent, Uzbekistan, UAE)
-        foreign_indicators = ["tashkent", "uzbekistan", ".uz/", ".uz", ".ru/", ".ru", ".pk/", ".pk", ".bd/", ".bd", ".ng/", ".ng", "dubai", "uae", ".ae/", ".ae"]
+        # Validation: Exclude foreign non-Indian storefronts (e.g., Tashkent, Uzbekistan, UAE, Kenya, Bangladesh, Walmart, BackMarket)
+        foreign_indicators = ["tashkent", "uzbekistan", ".uz/", ".uz", ".ru/", ".ru", ".pk/", ".pk", ".bd/", ".bd", ".ng/", ".ng", "dubai", "uae", ".ae/", ".ae", "walmart.", "backmarket.", ".ke/", ".ke", "kenya", "bangladesh", "applegadgetsbd"]
         norm_url_lower = norm_url.lower()
         title_lower = title.lower()
         if any(fi in norm_url_lower or fi in title_lower for fi in foreign_indicators):

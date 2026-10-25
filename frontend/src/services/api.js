@@ -30,9 +30,26 @@ function apiError(error) {
 }
 
 async function authHeaders() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) throw new Error('Please sign in to continue.');
-    return { Authorization: `Bearer ${session.access_token}` };
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+            return { Authorization: `Bearer ${session.access_token}` };
+        }
+    } catch (e) {
+        console.warn('Supabase getSession failed, checking local session', e);
+    }
+
+    const local = localStorage.getItem('seamas_user_session');
+    if (local) {
+        try {
+            const parsed = JSON.parse(local);
+            if (parsed.isGuest || parsed.id === 'guest-explorer-uuid' || !parsed.isLoggedIn) {
+                return { Authorization: 'Bearer guest-preview-token' };
+            }
+        } catch (e) {}
+    }
+
+    throw new Error('Please sign in to continue.');
 }
 
 export const apiService = {
