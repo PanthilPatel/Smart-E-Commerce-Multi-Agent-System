@@ -22,7 +22,8 @@ import {
     Truck,
     CreditCard,
     RotateCw,
-    Calendar
+    Calendar,
+    Clock
 } from 'lucide-react';
 import { useMagneticButton } from '../hooks/useMotionPhysics';
 
@@ -803,8 +804,34 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
     // Automatic daily rotation seed: shifts default batch automatically every 24 hours
     const daySeed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
     const [dealBatchIndex, setDealBatchIndex] = useState(() => daySeed % DEAL_BATCHES.length);
+    const [isDealPaused, setIsDealPaused] = useState(false);
+    const [timeToMidnight, setTimeToMidnight] = useState('06h 00m');
     const activeDeals = DEAL_BATCHES[dealBatchIndex] || DEAL_BATCHES[0];
     const todayDateStr = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+    // Auto-switch trending deals automatically every 5.5 seconds (pauses smoothly when user hovers)
+    useEffect(() => {
+        if (isDealPaused || loading) return;
+        const interval = setInterval(() => {
+            setDealBatchIndex((prev) => (prev + 1) % DEAL_BATCHES.length);
+        }, 5500);
+        return () => clearInterval(interval);
+    }, [isDealPaused, loading]);
+
+    // Live countdown to midnight daily deal reset
+    useEffect(() => {
+        const updateCountdown = () => {
+            const now = new Date();
+            const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+            const diffMs = Math.max(0, midnight - now);
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            setTimeToMidnight(`${String(hours).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m`);
+        };
+        updateCountdown();
+        const timer = setInterval(updateCountdown, 60000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Dynamic scanning ticker rotating every 1.4 seconds when loading
     useEffect(() => {
@@ -1186,23 +1213,44 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2.5">
-                        <button
-                            type="button"
-                            onClick={() => setDealBatchIndex((prev) => (prev + 1) % DEAL_BATCHES.length)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] hover:border-[#E6C762]/30 text-xs font-semibold text-zinc-200 hover:text-white transition-all active:scale-95 shadow-sm"
-                            title="Sweep next verified deal category batch"
-                        >
-                            <RotateCw className="w-3.5 h-3.5 text-[#E6C762] transition-transform duration-300 hover:rotate-180" />
-                            <span>Sweep Next Deals ({dealBatchIndex + 1}/{DEAL_BATCHES.length})</span>
-                        </button>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-zinc-300 shadow-sm">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E6C762] opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E6C762]"></span>
+                            </span>
+                            <span>Auto-Switching ({dealBatchIndex + 1}/{DEAL_BATCHES.length})</span>
+                        </div>
+
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs font-mono text-zinc-400">
+                            <Clock className="w-3.5 h-3.5 text-[#E6C762]" />
+                            <span>Daily Reset in {timeToMidnight}</span>
+                        </div>
+
                         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#34D399]/10 border border-[#34D399]/25 text-[#34D399] font-mono text-[10px] font-semibold shadow-sm">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
-                            <span>DOM-Verified Live Active</span>
+                            <span>DOM-Verified Live</span>
+                        </div>
+
+                        {/* Interactive Pagination Dots */}
+                        <div className="flex items-center gap-1.5 pl-1">
+                            {DEAL_BATCHES.map((_, idx) => (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => setDealBatchIndex(idx)}
+                                    className={`h-2 rounded-full transition-all duration-300 ${dealBatchIndex === idx ? 'w-6 bg-[#E6C762] shadow-[0_0_8px_rgba(230,199,98,0.5)]' : 'w-2 bg-white/20 hover:bg-white/40'}`}
+                                    aria-label={`Jump to batch ${idx + 1}`}
+                                />
+                            ))}
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in">
+                <div 
+                    onMouseEnter={() => setIsDealPaused(true)}
+                    onMouseLeave={() => setIsDealPaused(false)}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-500"
+                >
                     {activeDeals.map((deal) => (
                         <div
                             key={deal.id}
