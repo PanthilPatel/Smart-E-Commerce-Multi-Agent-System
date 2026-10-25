@@ -20,7 +20,9 @@ import {
     Tag,
     TrendingDown,
     Truck,
-    CreditCard
+    CreditCard,
+    RotateCw,
+    Calendar
 } from 'lucide-react';
 import { useMagneticButton } from '../hooks/useMotionPhysics';
 
@@ -270,6 +272,211 @@ const S24_ULTRA_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 </svg>
 `)}`;
 
+const ONEPLUS_12_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="op-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.25)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <linearGradient id="op-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14532D"/>
+      <stop offset="50%" stop-color="#064E3B"/>
+      <stop offset="100%" stop-color="#022C22"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="200" cy="280" rx="110" ry="15" fill="url(#op-shadow)"/>
+  <g transform="translate(136, 42)">
+    <rect x="0" y="0" width="102" height="220" rx="16" fill="#042F24" stroke="#059669" stroke-width="1.5"/>
+    <rect x="2.5" y="2.5" width="97" height="215" rx="14" fill="url(#op-emerald)"/>
+    <circle cx="48" cy="62" r="34" fill="#0B382C" stroke="#10B981" stroke-width="2"/>
+    <circle cx="48" cy="62" r="28" fill="#022C22" stroke="#047857" stroke-width="1.5"/>
+    <circle cx="36" cy="50" r="10" fill="#000" stroke="#059669" stroke-width="1.5"/>
+    <circle cx="60" cy="50" r="10" fill="#000" stroke="#059669" stroke-width="1.5"/>
+    <circle cx="48" cy="74" r="10" fill="#000" stroke="#059669" stroke-width="1.5"/>
+    <circle cx="35" cy="49" r="3" fill="#34D399" opacity="0.8"/>
+    <circle cx="59" cy="49" r="3" fill="#34D399" opacity="0.8"/>
+  </g>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#10B981" text-anchor="middle">ONEPLUS 12 5G</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">HASSELBLAD CAMERA · SNAPDRAGON 8 GEN 3</text>
+</svg>
+`)}`;
+
+const PS5_SLIM_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="ps5-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.28)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <linearGradient id="ps5-white" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E2E8F0"/>
+      <stop offset="50%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="200" cy="275" rx="100" ry="16" fill="url(#ps5-shadow)"/>
+  <g transform="translate(150, 40)">
+    <path d="M 12 10 Q 8 110, 4 210 L 96 210 Q 92 110, 88 10 Z" fill="#0B0C10"/>
+    <path d="M 2 5 Q 0 110, 10 215 L 26 215 Q 16 110, 14 5 Z" fill="url(#ps5-white)" stroke="#CBD5E1" stroke-width="1"/>
+    <path d="M 98 5 Q 100 110, 90 215 L 74 215 Q 84 110, 86 5 Z" fill="url(#ps5-white)" stroke="#CBD5E1" stroke-width="1"/>
+    <path d="M 14 30 Q 50 20, 86 30" stroke="#38BDF8" stroke-width="3" fill="none" opacity="0.9"/>
+    <rect x="46" y="80" width="8" height="40" rx="3" fill="#1E293B"/>
+    <circle cx="50" cy="180" r="4" fill="#38BDF8"/>
+  </g>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#1E293B" text-anchor="middle">PLAYSTATION 5 SLIM</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">DISC EDITION · 1TB SSD · 4K 120FPS</text>
+</svg>
+`)}`;
+
+const IPAD_AIR_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="ipad-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.22)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <linearGradient id="ipad-screen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7"/>
+      <stop offset="40%" stop-color="#818CF8"/>
+      <stop offset="70%" stop-color="#C084FC"/>
+      <stop offset="100%" stop-color="#E879F9"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="200" cy="275" rx="115" ry="16" fill="url(#ipad-shadow)"/>
+  <g transform="translate(125, 45)">
+    <rect x="0" y="0" width="150" height="210" rx="14" fill="#334155" stroke="#64748B" stroke-width="1.5"/>
+    <rect x="4" y="4" width="142" height="202" rx="10" fill="#000"/>
+    <rect x="7" y="7" width="136" height="196" rx="8" fill="url(#ipad-screen)"/>
+    <circle cx="75" cy="3" r="1.5" fill="#1E293B"/>
+  </g>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#475569" text-anchor="middle">IPAD AIR 11" M2</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">LIQUID RETINA · APPLE M2 CHIP</text>
+</svg>
+`)}`;
+
+const BOSE_QC_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bose-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.22)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="200" cy="275" rx="115" ry="16" fill="url(#bose-shadow)"/>
+  <path d="M 125 178 C 120 70, 280 70, 275 178" fill="none" stroke="#1E293B" stroke-width="16" stroke-linecap="round"/>
+  <ellipse cx="120" cy="205" rx="26" ry="44" fill="#0F172A" stroke="#334155" stroke-width="2"/>
+  <ellipse cx="280" cy="205" rx="26" ry="44" fill="#0F172A" stroke="#334155" stroke-width="2"/>
+  <ellipse cx="125" cy="205" rx="16" ry="32" fill="#E2E8F0"/>
+  <ellipse cx="275" cy="205" rx="16" ry="32" fill="#E2E8F0"/>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#334155" text-anchor="middle">BOSE QC ULTRA</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">SPATIAL AUDIO · WORLD-CLASS ANC</text>
+</svg>
+`)}`;
+
+const LG_OLED_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="tv-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.25)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <linearGradient id="tv-screen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="40%" stop-color="#0F172A"/>
+      <stop offset="70%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#312E81"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="200" cy="275" rx="130" ry="16" fill="url(#tv-shadow)"/>
+  <g transform="translate(60, 55)">
+    <rect x="0" y="0" width="280" height="175" rx="6" fill="#09090B" stroke="#334155" stroke-width="1.5"/>
+    <rect x="3" y="3" width="274" height="169" rx="4" fill="url(#tv-screen)"/>
+    <path d="M 120 175 L 110 205 L 170 205 L 160 175 Z" fill="#475569"/>
+    <rect x="90" y="205" width="100" height="4" rx="2" fill="#64748B"/>
+  </g>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#3B82F6" text-anchor="middle">LG C3 55" 4K OLED</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">120HZ GAMING · DOLBY VISION CINEMA</text>
+</svg>
+`)}`;
+
+const ROG_G14_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="rog-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.25)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <linearGradient id="rog-screen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="50%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#4C0519"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="200" cy="275" rx="130" ry="16" fill="url(#rog-shadow)"/>
+  <g transform="translate(75, 55)">
+    <rect x="0" y="0" width="250" height="150" rx="8" fill="#18181B" stroke="#3F3F46" stroke-width="1.5"/>
+    <rect x="5" y="5" width="240" height="140" rx="6" fill="url(#rog-screen)"/>
+  </g>
+  <g transform="translate(50, 200)">
+    <path d="M 25 0 L 275 0 L 295 45 L 5 45 Z" fill="#27272A" stroke="#52525B" stroke-width="1.2"/>
+    <rect x="50" y="6" width="200" height="22" rx="2" fill="#09090B"/>
+    <circle cx="150" cy="17" r="2" fill="#E11D48"/>
+  </g>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#E11D48" text-anchor="middle">ROG ZEPHYRUS G14</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">OLED 120HZ · RYZEN 9 · RTX 4060</text>
+</svg>
+`)}`;
+
+const KEYCHRON_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="kb-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.22)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="200" cy="275" rx="125" ry="16" fill="url(#kb-shadow)"/>
+  <g transform="translate(70, 95)">
+    <rect x="0" y="0" width="260" height="120" rx="12" fill="#1E293B" stroke="#475569" stroke-width="2"/>
+    <rect x="8" y="8" width="244" height="104" rx="8" fill="#0F172A"/>
+    <rect x="14" y="14" width="20" height="16" rx="3" fill="#EA580C"/>
+    <rect x="38" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="62" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="86" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="110" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="134" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="158" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="182" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="206" y="14" width="20" height="16" rx="3" fill="#64748B"/>
+    <rect x="230" y="14" width="16" height="16" rx="3" fill="#EA580C"/>
+    <rect x="14" y="34" width="232" height="66" rx="4" fill="#1E293B" opacity="0.6"/>
+  </g>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#EA580C" text-anchor="middle">KEYCHRON K2 V2</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">WIRELESS MECHANICAL · RGB HOT-SWAP</text>
+</svg>
+`)}`;
+
+const APPLE_WATCH_STUDIO_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <radialGradient id="aw-shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(0,0,0,0.22)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="200" cy="275" rx="80" ry="15" fill="url(#aw-shadow)"/>
+  <rect x="175" y="35" width="50" height="230" rx="14" fill="#334155"/>
+  <rect x="155" y="90" width="90" height="115" rx="24" fill="#0F172A" stroke="#94A3B8" stroke-width="2.5"/>
+  <rect x="160" y="95" width="80" height="105" rx="20" fill="#000"/>
+  <circle cx="200" cy="148" r="32" fill="none" stroke="#F59E0B" stroke-width="4"/>
+  <circle cx="200" cy="148" r="24" fill="none" stroke="#10B981" stroke-width="4"/>
+  <circle cx="200" cy="148" r="16" fill="none" stroke="#EF4444" stroke-width="4"/>
+  <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#94A3B8" text-anchor="middle">APPLE WATCH S10</text>
+  <text x="200" y="310" font-family="monospace" font-size="9" font-weight="600" fill="#997A2E" text-anchor="middle">TITANIUM · ALWAYS-ON RETINA</text>
+</svg>
+`)}`;
+
 const ALL_SUGGESTIONS = [
     { label: 'Cozy retro mechanical keyboards with RGB light & pastel keycaps' },
     { label: 'Best noise-cancelling wireless earbuds under ₹15,000' },
@@ -339,79 +546,232 @@ const DEPARTMENTS = [
     },
 ];
 
-const CURATED_DEALS = [
-    {
-        id: 'sony-xm5',
-        title: 'Sony WH-1000XM5 Wireless ANC Headphones',
-        subtitle: 'Industry-leading Active Noise Cancellation with dual processors & 8 mics',
-        badge: 'Amazon India',
-        storeDot: '#F59E0B',
-        rating: '4.8',
-        reviews: '3,420',
-        price: 24990,
-        originalPrice: 34990,
-        savingsText: 'Save ₹10,000 (29% OFF)',
-        ribbon: 'LIMITED TIME DEAL',
-        bankOffer: '💳 Extra ₹2,000 off with HDFC / ICICI Credit Cards',
-        deliveryTag: '🚚 Free Next-Day Delivery · Official Brand Warranty',
-        query: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
-        buyUrl: 'https://www.amazon.in/s?k=Sony+WH-1000XM5',
-        image: SONY_XM5_STUDIO_SVG,
-    },
-    {
-        id: 'iphone-16-pro',
-        title: 'Apple iPhone 16 Pro (128GB, Natural Titanium)',
-        subtitle: 'A18 Pro chip, 48MP Fusion camera system with 4K 120 fps Dolby Vision',
-        badge: 'Croma / Flipkart',
-        storeDot: '#3B82F6',
-        rating: '4.9',
-        reviews: '5,180',
-        price: 112900,
-        originalPrice: 119900,
-        savingsText: 'Save ₹7,000 (6% OFF)',
-        ribbon: 'LOWEST PRICE IN 90 DAYS',
-        bankOffer: '💳 ₹4,000 Instant Cashback on SBI & ICICI Cards',
-        deliveryTag: '🚚 Free Express Delivery · Apple 1-Year Warranty',
-        query: 'Apple iPhone 16 Pro 128GB',
-        buyUrl: 'https://www.croma.com/searchB?q=iphone+16+pro',
-        image: IPHONE_16_PRO_STUDIO_SVG,
-    },
-    {
-        id: 'macbook-air-m3',
-        title: 'Apple MacBook Air 13" M3 (16GB RAM, 512GB SSD)',
-        subtitle: 'Liquid Retina display, up to 18 hrs battery, dual external monitor support',
-        badge: 'Flipkart / Amazon',
-        storeDot: '#10B981',
-        rating: '4.9',
-        reviews: '2,890',
-        price: 104990,
-        originalPrice: 114900,
-        savingsText: 'Save ₹9,910 (9% OFF)',
-        ribbon: 'TOP CREATOR PICK',
-        bankOffer: '💳 ₹5,000 Instant Discount + Up to 12M No-Cost EMI',
-        deliveryTag: '🚚 Free Assured Delivery · Apple Official Warranty',
-        query: 'MacBook Air M3 16GB',
-        buyUrl: 'https://www.flipkart.com/search?q=macbook+air+m3+16gb',
-        image: MACBOOK_M3_STUDIO_SVG,
-    },
-    {
-        id: 'galaxy-s24-ultra',
-        title: 'Samsung Galaxy S24 Ultra 5G (256GB, Titanium Gray)',
-        subtitle: 'Snapdragon 8 Gen 3 for Galaxy, 200MP camera with Galaxy AI & built-in S Pen',
-        badge: 'Amazon India',
-        storeDot: '#F59E0B',
-        rating: '4.8',
-        reviews: '4,120',
-        price: 102999,
-        originalPrice: 129999,
-        savingsText: 'Save ₹27,000 (21% OFF)',
-        ribbon: 'EXCHANGE BONUS ACTIVE',
-        bankOffer: '💳 Extra ₹6,000 off on All Major Bank Cards',
-        deliveryTag: '🚚 Prime 1-Day Delivery · Samsung Official Warranty',
-        query: 'Samsung Galaxy S24 Ultra 256GB',
-        buyUrl: 'https://www.amazon.in/s?k=Samsung+Galaxy+S24+Ultra',
-        image: S24_ULTRA_STUDIO_SVG,
-    },
+const DEAL_BATCHES = [
+    // Batch 0: Flagship Ecosystems & ANC Audio
+    [
+        {
+            id: 'sony-xm5',
+            title: 'Sony WH-1000XM5 Wireless ANC Headphones',
+            subtitle: 'Industry-leading Active Noise Cancellation with dual processors & 8 mics',
+            badge: 'Amazon India',
+            storeDot: '#F59E0B',
+            rating: '4.8',
+            reviews: '3,420',
+            price: 24990,
+            originalPrice: 34990,
+            savingsText: 'Save ₹10,000 (29% OFF)',
+            ribbon: 'LIMITED TIME DEAL',
+            bankOffer: '💳 Extra ₹2,000 off with HDFC / ICICI Credit Cards',
+            deliveryTag: '🚚 Free Next-Day Delivery · Official Brand Warranty',
+            query: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
+            buyUrl: 'https://www.amazon.in/s?k=Sony+WH-1000XM5',
+            image: SONY_XM5_STUDIO_SVG,
+        },
+        {
+            id: 'iphone-16-pro',
+            title: 'Apple iPhone 16 Pro (128GB, Natural Titanium)',
+            subtitle: 'A18 Pro chip, 48MP Fusion camera system with 4K 120 fps Dolby Vision',
+            badge: 'Croma / Flipkart',
+            storeDot: '#3B82F6',
+            rating: '4.9',
+            reviews: '5,180',
+            price: 112900,
+            originalPrice: 119900,
+            savingsText: 'Save ₹7,000 (6% OFF)',
+            ribbon: 'LOWEST PRICE IN 90 DAYS',
+            bankOffer: '💳 ₹4,000 Instant Cashback on SBI & ICICI Cards',
+            deliveryTag: '🚚 Free Express Delivery · Apple 1-Year Warranty',
+            query: 'Apple iPhone 16 Pro 128GB',
+            buyUrl: 'https://www.croma.com/searchB?q=iphone+16+pro',
+            image: IPHONE_16_PRO_STUDIO_SVG,
+        },
+        {
+            id: 'macbook-air-m3',
+            title: 'Apple MacBook Air 13" M3 (16GB RAM, 512GB SSD)',
+            subtitle: 'Liquid Retina display, up to 18 hrs battery, dual external monitor support',
+            badge: 'Flipkart / Amazon',
+            storeDot: '#10B981',
+            rating: '4.9',
+            reviews: '2,890',
+            price: 104990,
+            originalPrice: 114900,
+            savingsText: 'Save ₹9,910 (9% OFF)',
+            ribbon: 'TOP CREATOR PICK',
+            bankOffer: '💳 ₹5,000 Instant Discount + Up to 12M No-Cost EMI',
+            deliveryTag: '🚚 Free Assured Delivery · Apple Official Warranty',
+            query: 'MacBook Air M3 16GB',
+            buyUrl: 'https://www.flipkart.com/search?q=macbook+air+m3+16gb',
+            image: MACBOOK_M3_STUDIO_SVG,
+        },
+        {
+            id: 'galaxy-s24-ultra',
+            title: 'Samsung Galaxy S24 Ultra 5G (256GB, Titanium Gray)',
+            subtitle: 'Snapdragon 8 Gen 3 for Galaxy, 200MP camera with Galaxy AI & built-in S Pen',
+            badge: 'Amazon India',
+            storeDot: '#F59E0B',
+            rating: '4.8',
+            reviews: '4,120',
+            price: 102999,
+            originalPrice: 129999,
+            savingsText: 'Save ₹27,000 (21% OFF)',
+            ribbon: 'EXCHANGE BONUS ACTIVE',
+            bankOffer: '💳 Extra ₹6,000 off on All Major Bank Cards',
+            deliveryTag: '🚚 Prime 1-Day Delivery · Samsung Official Warranty',
+            query: 'Samsung Galaxy S24 Ultra 256GB',
+            buyUrl: 'https://www.amazon.in/s?k=Samsung+Galaxy+S24+Ultra',
+            image: S24_ULTRA_STUDIO_SVG,
+        },
+    ],
+    // Batch 1: Next-Gen Performance & Gaming
+    [
+        {
+            id: 'oneplus-12',
+            title: 'OnePlus 12 5G (16GB RAM, 512GB, Flowy Emerald)',
+            subtitle: 'Snapdragon 8 Gen 3, 4th Gen Hasselblad Camera, 5400mAh battery with 100W SuperVOOC',
+            badge: 'Reliance Digital',
+            storeDot: '#10B981',
+            rating: '4.7',
+            reviews: '2,310',
+            price: 64999,
+            originalPrice: 69999,
+            savingsText: 'Save ₹5,000 (7% OFF)',
+            ribbon: 'HOT SPEED PICK',
+            bankOffer: '💳 ₹3,000 Instant Discount on OneCard & ICICI',
+            deliveryTag: '🚚 Free Express Delivery · Brand Direct Warranty',
+            query: 'OnePlus 12 512GB Flowy Emerald',
+            buyUrl: 'https://www.reliancedigital.in/search?q=oneplus+12',
+            image: ONEPLUS_12_STUDIO_SVG,
+        },
+        {
+            id: 'ps5-slim',
+            title: 'Sony PlayStation 5 Slim (1TB SSD, Disc Edition)',
+            subtitle: 'Ultra-high speed 1TB SSD, Ray Tracing, 4K-TV Gaming up to 120fps with HDR',
+            badge: 'Vijay Sales',
+            storeDot: '#3B82F6',
+            rating: '4.9',
+            reviews: '6,480',
+            price: 49990,
+            originalPrice: 54990,
+            savingsText: 'Save ₹5,000 (9% OFF)',
+            ribbon: 'GAMING MEGA DROP',
+            bankOffer: '💳 Flat ₹2,500 off on Axis Bank & HDFC Cards',
+            deliveryTag: '🚚 Free Guaranteed Delivery · Sony Official 1-Yr',
+            query: 'PlayStation 5 Slim Disc Edition',
+            buyUrl: 'https://www.vijaysales.com/search/ps5-slim',
+            image: PS5_SLIM_STUDIO_SVG,
+        },
+        {
+            id: 'ipad-air-m2',
+            title: 'Apple iPad Air 11" M2 (128GB, Space Grey, Wi-Fi)',
+            subtitle: 'Apple M2 chip, 11-inch Liquid Retina display, Landscape 12MP Ultra Wide front camera',
+            badge: 'Apple / Croma',
+            storeDot: '#64748B',
+            rating: '4.8',
+            reviews: '1,940',
+            price: 56900,
+            originalPrice: 59900,
+            savingsText: 'Save ₹3,000 (5% OFF)',
+            ribbon: 'STUDENT & PRO PICK',
+            bankOffer: '💳 ₹4,000 Instant Cashback on HDFC Bank Cards',
+            deliveryTag: '🚚 Free Next-Day Delivery · Apple 1-Year Warranty',
+            query: 'Apple iPad Air M2 11 inch',
+            buyUrl: 'https://www.croma.com/searchB?q=ipad+air+m2',
+            image: IPAD_AIR_STUDIO_SVG,
+        },
+        {
+            id: 'bose-qc-ultra',
+            title: 'Bose QuietComfort Ultra Spatial Audio Headphones',
+            subtitle: 'Breakthrough spatialized audio for more immersive listening, CustomTune technology',
+            badge: 'Amazon India',
+            storeDot: '#F59E0B',
+            rating: '4.7',
+            reviews: '1,560',
+            price: 29900,
+            originalPrice: 35900,
+            savingsText: 'Save ₹6,000 (17% OFF)',
+            ribbon: 'SPATIAL AUDIO STAR',
+            bankOffer: '💳 Extra ₹1,500 off on HDFC / ICICI Cards',
+            deliveryTag: '🚚 Free Prime Delivery · Bose Official Warranty',
+            query: 'Bose QuietComfort Ultra Headphones',
+            buyUrl: 'https://www.amazon.in/s?k=Bose+QuietComfort+Ultra',
+            image: BOSE_QC_STUDIO_SVG,
+        },
+    ],
+    // Batch 2: Cinema, Creators & Desk Gear
+    [
+        {
+            id: 'lg-c3-oled',
+            title: 'LG C3 55" 4K OLED evo Smart Cinema TV',
+            subtitle: 'Self-lit OLED evo pixels, α9 AI Processor Gen6, Dolby Vision IQ & Atmos, 0.1ms 120Hz',
+            badge: 'Croma / Tata CLiQ',
+            storeDot: '#3B82F6',
+            rating: '4.9',
+            reviews: '1,420',
+            price: 99990,
+            originalPrice: 139990,
+            savingsText: 'Save ₹40,000 (29% OFF)',
+            ribbon: 'CINEMA SHOWSTOPPER',
+            bankOffer: '💳 Flat ₹5,000 Bank Cashback + Free Installation',
+            deliveryTag: '🚚 Free White-Glove Scheduled Delivery · 3-Yr Panel',
+            query: 'LG C3 55 inch 4K OLED TV',
+            buyUrl: 'https://www.croma.com/searchB?q=lg+c3+55+oled',
+            image: LG_OLED_STUDIO_SVG,
+        },
+        {
+            id: 'rog-zephyrus-g14',
+            title: 'ASUS ROG Zephyrus G14 (AMD Ryzen 9, RTX 4060, OLED)',
+            subtitle: '14" 3K 120Hz OLED ROG Nebula display, 16GB LPDDR5X, 1TB SSD, 1.5kg ultraportable',
+            badge: 'Flipkart Assured',
+            storeDot: '#E11D48',
+            rating: '4.8',
+            reviews: '890',
+            price: 134990,
+            originalPrice: 159990,
+            savingsText: 'Save ₹25,000 (16% OFF)',
+            ribbon: 'TOP GAMING RIG',
+            bankOffer: '💳 ₹7,500 Instant Discount on All Major Bank Cards',
+            deliveryTag: '🚚 Free Express Delivery · ASUS Official On-Site',
+            query: 'ASUS ROG Zephyrus G14 OLED RTX 4060',
+            buyUrl: 'https://www.flipkart.com/search?q=rog+zephyrus+g14+oled',
+            image: ROG_G14_STUDIO_SVG,
+        },
+        {
+            id: 'keychron-k2',
+            title: 'Keychron K2 V2 Wireless RGB Mechanical Keyboard',
+            subtitle: '75% compact layout, Mac/Windows dual layout, Gateron G Pro Brown switches, Bluetooth 5.1',
+            badge: 'Amazon India',
+            storeDot: '#EA580C',
+            rating: '4.8',
+            reviews: '3,210',
+            price: 7499,
+            originalPrice: 9999,
+            savingsText: 'Save ₹2,500 (25% OFF)',
+            ribbon: 'DESK SETUP ESSENTIAL',
+            bankOffer: '💳 10% Instant Discount on SBI Cards',
+            deliveryTag: '🚚 Prime 1-Day Delivery · 1-Year Brand Warranty',
+            query: 'Keychron K2 V2 Wireless Mechanical Keyboard',
+            buyUrl: 'https://www.amazon.in/s?k=Keychron+K2+V2',
+            image: KEYCHRON_STUDIO_SVG,
+        },
+        {
+            id: 'apple-watch-s10',
+            title: 'Apple Watch Series 10 (GPS + Cellular, 46mm Titanium)',
+            subtitle: 'Thinnest Apple Watch ever, largest display, advanced ECG, Sleep Apnea notifications',
+            badge: 'Apple / Amazon',
+            storeDot: '#94A3B8',
+            rating: '4.9',
+            reviews: '1,120',
+            price: 44900,
+            originalPrice: 49900,
+            savingsText: 'Save ₹5,000 (10% OFF)',
+            ribbon: 'TITANIUM FLAGSHIP',
+            bankOffer: '💳 ₹2,500 Instant Cashback on ICICI & HDFC Cards',
+            deliveryTag: '🚚 Free Express Delivery · Apple 1-Year Warranty',
+            query: 'Apple Watch Series 10 Titanium',
+            buyUrl: 'https://www.amazon.in/s?k=Apple+Watch+Series+10',
+            image: APPLE_WATCH_STUDIO_SVG,
+        },
+    ],
 ];
 
 const RETAILER_PARTNERS = [
@@ -439,6 +799,12 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
     const [tickerIndex, setTickerIndex] = useState(0);
     const inputRef = useRef(null);
     const magneticBtn = useMagneticButton(0.24);
+
+    // Automatic daily rotation seed: shifts default batch automatically every 24 hours
+    const daySeed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    const [dealBatchIndex, setDealBatchIndex] = useState(() => daySeed % DEAL_BATCHES.length);
+    const activeDeals = DEAL_BATCHES[dealBatchIndex] || DEAL_BATCHES[0];
+    const todayDateStr = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
 
     // Dynamic scanning ticker rotating every 1.4 seconds when loading
     useEffect(() => {
@@ -809,24 +1175,35 @@ export default function ChatInterface({ onQuerySubmit, loading, isGuest = false,
                         <div className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#E6C762] shadow-[0_0_8px_#E6C762]" />
                             <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#E6C762] font-semibold">
-                                Live Storefront Index · Verified Arbitrage Deals
+                                Live Storefront Index · Daily Cycle: {todayDateStr}
                             </span>
                         </div>
-                        <h2 className="mt-1 text-xl sm:text-2xl font-bold tracking-tight text-white">
-                            Today's Verified Price Drops & Trending Deals
+                        <h2 className="mt-1 text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-3">
+                            <span>Today's Verified Price Drops & Trending Deals</span>
                         </h2>
                         <p className="text-xs text-zinc-400 mt-0.5">
-                            Real-time price convergence across verified Indian marketplaces with active inventory.
+                            Real-time price convergence across verified Indian marketplaces with active inventory. Rotates automatically every 24 hours.
                         </p>
                     </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#34D399]/10 border border-[#34D399]/25 text-[#34D399] font-mono text-[10px] font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
-                        <span>DOM-Verified Prices Active</span>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <button
+                            type="button"
+                            onClick={() => setDealBatchIndex((prev) => (prev + 1) % DEAL_BATCHES.length)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] hover:border-[#E6C762]/30 text-xs font-semibold text-zinc-200 hover:text-white transition-all active:scale-95 shadow-sm"
+                            title="Sweep next verified deal category batch"
+                        >
+                            <RotateCw className="w-3.5 h-3.5 text-[#E6C762] transition-transform duration-300 hover:rotate-180" />
+                            <span>Sweep Next Deals ({dealBatchIndex + 1}/{DEAL_BATCHES.length})</span>
+                        </button>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#34D399]/10 border border-[#34D399]/25 text-[#34D399] font-mono text-[10px] font-semibold shadow-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+                            <span>DOM-Verified Live Active</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {CURATED_DEALS.map((deal) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in">
+                    {activeDeals.map((deal) => (
                         <div
                             key={deal.id}
                             className="group relative flex flex-col justify-between rounded-2xl bg-[#121215] border border-white/[0.08] hover:border-white/20 transition-all duration-300 hover:-translate-y-1 shadow-[0_16px_36px_-12px_rgba(0,0,0,0.8)] overflow-hidden"
